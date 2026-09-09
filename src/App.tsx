@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import Navigation from './sections/Navigation';
 import Hero from './sections/Hero';
 import Services from './sections/Services';
-import WineSelection from './sections/WineSelection';
 import About from './sections/About';
 import Experience from './sections/Experience';
 import Contact from './sections/Contact';
@@ -32,7 +31,6 @@ function App() {
       <main>
         <Hero />
         <Services />
-        <WineSelection />
         <About />
         <Experience />
         <Contact />
