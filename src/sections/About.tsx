@@ -74,7 +74,7 @@ export default function About() {
         {/* Section header */}
         <div className={`text-center mb-20 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <span className="inline-block text-gold text-xs tracking-[0.3em] uppercase mb-6">Hakkımda</span>
-          <h2 className="text-5xl sm:text-6xl font-serif text-white mb-6">
+          <h2 className="mx-auto max-w-full text-4xl leading-tight sm:text-6xl sm:leading-normal font-serif text-white mb-6">
             Profesyonel <span className="text-gradient-gold italic">Yolculuğum</span>
           </h2>
           <div className="flex items-center justify-center gap-4">
