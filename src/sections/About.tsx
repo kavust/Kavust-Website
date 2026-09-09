@@ -35,6 +35,12 @@ export default function About() {
       className="relative w-full py-32 overflow-hidden bg-black-deep"
       ref={sectionRef}
     >
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-30"
+        style={{ backgroundImage: `url(${import.meta.env.BASE_URL}images/about-wine-table.jpeg)` }}
+        aria-hidden="true"
+      />
+      <div className="absolute inset-0 bg-black-deep/80" aria-hidden="true" />
       {/* Decorative line */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-24 bg-gradient-to-b from-gold/50 to-transparent" />
 
@@ -57,20 +63,13 @@ export default function About() {
           <div className={`space-y-8 transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
             <div className="space-y-6">
               <p className="text-gray-300 text-lg leading-relaxed">
-                Merhaba, ben <span className="text-gold font-medium">İbrahim Kavüşt</span>. 
-                Uluslararası sertifikalı bir Sommelier ve otel/restoran yönetimi alanında 
-                kapsamlı deneyime sahip bir profesyonelim.
+                <span className="text-gold font-medium">İbrahim Kavüşt</span>, konaklama ve gastronomi sektöründe uluslararası deneyime sahip bir sommelier ve servis profesyonelidir. Kariyerini Türkiye, Dubai ve Amerika Birleşik Devletleri’nde şekillendiren Kavüşt; şarap danışmanlığı, misafir deneyimi, ekip eğitimi ve restoran operasyonları alanlarında çalışmaktadır.
               </p>
               <p className="text-gray-400 leading-relaxed">
-                The Barrel Bistro and Wine Bar'da Service Manager olarak görev yaparken, 
-                öncesinde Dubai Le Meridien Mina Seyahi Beach Resort & Waterpark'da 
-                Supervisor pozisyonunda çalıştım. EXPO 2020 Dubai'de Marriott 
-                International bünyesinde de değerli deneyimler kazandım.
+                Profesyonel yolculuğuna Türkiye’de turizm ve hizmet sektöründe başlayan İbrahim, Dubai’de Marriott bünyesinde çalışarak lüks misafirperverlik standartları üzerine deneyim kazandı. 2023’ten bu yana California’da The Barrel Bistro and Wine Bar’da görev alıyor; şarap servisi ve yiyecek–içecek eşleştirmelerinin yanı sıra servis kalitesinin geliştirilmesi, ekip organizasyonu ve misafir memnuniyetine odaklanıyor.
               </p>
               <p className="text-gray-400 leading-relaxed">
-                Türkiye'de Esen Tourism'de Restaurant Manager ve Cestur Cesme'de 
-                Restaurant Captain olarak görev aldım. Misafir memnuniyeti, ekip 
-                yönetimi, şarap bilgisi ve operasyonel mükemmellik konularında uzmanlaştım.
+                Şaraba yaklaşımında teknik bilgiyi ulaşılabilir bir deneyimle birleştirmeyi amaçlıyor. Her misafirin damak zevkine, her menünün karakterine ve her işletmenin hedeflerine uygun çözümler üretmeye önem veriyor. Restoranlar, oteller ve hospitality projeleri için şarap programı oluşturma, ekip eğitimi, menü eşleştirmeleri ve operasyonel iyileştirme konularında destek sunuyor.
               </p>
             </div>
 
