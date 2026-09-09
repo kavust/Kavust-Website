@@ -45,7 +45,7 @@ export default function Hero() {
           {/* Logo - bigger */}
           <div className="mb-12 animate-fade-in">
             <img 
-              src={`${import.meta.env.BASE_URL}images/kavust-logo.png`}
+              src={`${import.meta.env.BASE_URL}images/kavust-logo-v2.png`}
               alt="Logo" 
               className="h-20 w-auto opacity-90"
             />

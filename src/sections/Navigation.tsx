@@ -62,7 +62,7 @@ export default function Navigation() {
               className="flex items-center gap-3"
             >
               <img 
-                src={`${import.meta.env.BASE_URL}images/kavust-logo.png`}
+                src={`${import.meta.env.BASE_URL}images/kavust-logo-v2.png`}
                 alt="Logo" 
                 className="h-10 w-auto opacity-90"
               />
