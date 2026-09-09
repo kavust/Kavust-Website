@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import type { Language } from '@/i18n';
 
 const navLinks = [
   { label: 'Ana Sayfa', href: '#home' },
@@ -9,7 +10,9 @@ const navLinks = [
   { label: 'İletişim', href: '#contact' },
 ];
 
-export default function Navigation() {
+interface NavigationProps { language: Language; onLanguageChange: (language: Language) => void; }
+
+export default function Navigation({ language, onLanguageChange }: NavigationProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
@@ -95,9 +98,14 @@ export default function Navigation() {
                   {link.label}
                 </a>
               ))}
+              <button onClick={() => onLanguageChange(language === 'tr' ? 'en' : 'tr')} className="border border-gold/30 px-2 py-1 text-[10px] tracking-wider text-gold hover:bg-gold hover:text-black-deep transition-colors" aria-label="Change language">
+                {language === 'tr' ? 'EN' : 'TR'}
+              </button>
             </div>
 
             {/* Mobile menu button */}
+            <div className="md:hidden flex items-center gap-2">
+              <button onClick={() => onLanguageChange(language === 'tr' ? 'en' : 'tr')} className="px-2 py-1 text-[10px] tracking-wider text-gold" aria-label="Change language">{language === 'tr' ? 'EN' : 'TR'}</button>
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
@@ -105,6 +113,7 @@ export default function Navigation() {
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
+            </div>
           </div>
         </div>
       </nav>
