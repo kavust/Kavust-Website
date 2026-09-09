@@ -35,6 +35,7 @@ export default function Contact() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submissionError, setSubmissionError] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -54,14 +55,29 @@ export default function Contact() {
     return () => observer.disconnect();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setSubmitted(true);
-    setFormData({ name: '', email: '', subject: '', message: '' });
-    setTimeout(() => setSubmitted(false), 5000);
+    setSubmissionError(false);
+
+    try {
+      const response = await fetch('https://formsubmit.co/ajax/kavustyeap@gmail.com', {
+        method: 'POST',
+        body: new FormData(e.currentTarget),
+        headers: { Accept: 'application/json' },
+      });
+
+      if (!response.ok) throw new Error('Form submission failed');
+
+      setSubmitted(true);
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch {
+      setSubmissionError(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -159,11 +175,17 @@ export default function Contact() {
                   <p className="text-gray-400">En kısa sürede size dönüş yapacağım.</p>
                 </div>
               ) : (
-                <form
-  action="https://formsubmit.co/kavustyeap@gmail.com"
-  method="POST" className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <input type="hidden" name="_subject" value="Kavust.com — Yeni iletişim formu mesajı" />
                   <input type="hidden" name="_template" value="table" />
+                  <input
+                    type="text"
+                    name="_honey"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    className="hidden"
+                    aria-hidden="true"
+                  />
                   <div className="grid sm:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-gray-500 text-xs uppercase tracking-wider mb-2">Adınız</label>
@@ -237,6 +259,11 @@ export default function Contact() {
                       </span>
                     )}
                   </Button>
+                  {submissionError && (
+                    <p className="text-center text-sm text-red-400">
+                      Mesaj gönderilemedi. Lütfen tekrar deneyin.
+                    </p>
+                  )}
                 </form>
               )}
             </div>
