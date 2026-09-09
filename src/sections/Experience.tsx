@@ -54,6 +54,7 @@ const experiences = [
 
 export default function Experience() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const backgroundRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -74,12 +75,45 @@ export default function Experience() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const updateBackgroundReveal = () => {
+      const section = sectionRef.current;
+      const background = backgroundRef.current;
+      if (!section || !background) return;
+
+      const rect = section.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const entering = Math.min(1, Math.max(0, (viewportHeight - rect.top) / (viewportHeight * 0.5)));
+      const leaving = Math.min(1, Math.max(0, rect.bottom / (viewportHeight * 0.5)));
+      const visibility = Math.min(entering, leaving);
+      const maxOpacity = window.innerWidth >= 1024 ? 0.24 : 0.42;
+
+      background.style.opacity = String(visibility * maxOpacity);
+    };
+
+    updateBackgroundReveal();
+    window.addEventListener('scroll', updateBackgroundReveal, { passive: true });
+    window.addEventListener('resize', updateBackgroundReveal);
+
+    return () => {
+      window.removeEventListener('scroll', updateBackgroundReveal);
+      window.removeEventListener('resize', updateBackgroundReveal);
+    };
+  }, []);
+
   return (
     <section
       id="experience"
       className="relative w-full py-32 overflow-hidden bg-black-matte"
       ref={sectionRef}
     >
+      <div
+        ref={backgroundRef}
+        className="absolute inset-x-0 top-0 h-[40rem] bg-cover bg-center bg-no-repeat opacity-0 transition-opacity duration-300 lg:inset-0 lg:h-auto"
+        style={{ backgroundImage: `url(${import.meta.env.BASE_URL}images/experience-wine-service.jpg)` }}
+        aria-hidden="true"
+      />
+      <div className="absolute inset-x-0 top-0 h-[40rem] bg-gradient-to-b from-black-matte/55 via-black-matte/80 to-black-matte lg:inset-0 lg:h-auto lg:bg-black-matte/85" aria-hidden="true" />
       {/* Decorative elements */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-gold/5 to-transparent" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-gold/5 rounded-full blur-3xl" />
