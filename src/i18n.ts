@@ -23,27 +23,41 @@ const english: Record<string, string> = {
   'Tüm hakları saklıdır.': 'All rights reserved.', 'Yukarı çık': 'Back to top'
 };
 
-const reverse = Object.fromEntries(Object.entries(english).map(([tr, en]) => [en, tr]));
-const originalText = new WeakMap<Text, string>();
+const originalText = new WeakMap<Text, { source: string; rendered: string }>();
+const originalPlaceholder = new WeakMap<HTMLElement, { source: string; rendered: string }>();
+const normalize = (value: string) => value.trim().replace(/\s+/g, ' ');
 
 export function translatePage(language: Language) {
-  const dictionary = language === 'en' ? english : reverse;
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   const nodes: Text[] = [];
   let node: Node | null;
   while ((node = walker.nextNode())) nodes.push(node as Text);
   nodes.forEach((textNode) => {
-    if (!originalText.has(textNode)) {
-      originalText.set(textNode, textNode.nodeValue?.trim().replace(/\s+/g, ' ') ?? '');
+    // Never rewrite editable values, script content, or styles.
+    if (textNode.parentElement?.closest('textarea, input, select, [contenteditable], script, style')) return;
+    const current = textNode.nodeValue ?? '';
+    let record = originalText.get(textNode);
+    // React can reuse a text node for a new status message.
+    if (!record || current !== record.rendered) {
+      record = { source: current, rendered: current };
+      originalText.set(textNode, record);
     }
-    const original = originalText.get(textNode) ?? '';
-    const translated = dictionary[original];
-    if (language === 'tr') textNode.nodeValue = original;
-    else if (translated !== undefined) textNode.nodeValue = translated;
+    const translation = english[normalize(record.source)];
+    const next = language === 'en' && translation !== undefined
+      ? record.source.match(/^\s*/)?.[0] + translation + record.source.match(/\s*$/)?.[0]
+      : record.source;
+    record.rendered = next;
+    if (current !== next) textNode.nodeValue = next;
   });
   document.querySelectorAll<HTMLElement>('[placeholder]').forEach((element) => {
-    const original = element.getAttribute('placeholder') ?? '';
-    const translated = dictionary[original];
-    if (translated) element.setAttribute('placeholder', translated);
+    const current = element.getAttribute('placeholder') ?? '';
+    let record = originalPlaceholder.get(element);
+    if (!record || current !== record.rendered) {
+      record = { source: current, rendered: current };
+      originalPlaceholder.set(element, record);
+    }
+    const next = language === 'en' ? english[normalize(record.source)] ?? record.source : record.source;
+    record.rendered = next;
+    if (current !== next) element.setAttribute('placeholder', next);
   });
 }

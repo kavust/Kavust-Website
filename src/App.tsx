@@ -20,8 +20,21 @@ function App() {
     document.documentElement.lang = language;
     localStorage.setItem('kavust-language', language);
     translatePage(language);
-    const observer = new MutationObserver(() => translatePage(language));
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    const options = { childList: true, subtree: true, characterData: true };
+    const observer = new MutationObserver((records) => {
+      const relevant = records.some(record => {
+        const element = record.target instanceof Element ? record.target : record.target.parentElement;
+        return !element?.closest('textarea, input, select, [contenteditable], script, style');
+      });
+      if (!relevant) return;
+      observer.disconnect();
+      try {
+        translatePage(language);
+      } finally {
+        observer.observe(document.body, options);
+      }
+    });
+    observer.observe(document.body, options);
     return () => observer.disconnect();
   }, [language]);
 
