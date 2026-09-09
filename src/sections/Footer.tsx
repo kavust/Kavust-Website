@@ -22,11 +22,14 @@ export default function Footer() {
         <div className="flex flex-col items-center">
           {/* Logo - bigger */}
           <div className="mb-6">
-            <img 
-              src={`${import.meta.env.BASE_URL}images/kavust-logo-v2.png`}
-              alt="Logo" 
-              className="h-24 w-auto opacity-80"
-            />
+            <picture>
+              <source media="(max-width: 767px)" srcSet={`${import.meta.env.BASE_URL}images/kavust-logo-mobile.png`} />
+              <img 
+                src={`${import.meta.env.BASE_URL}images/kavust-logo-v2.png`}
+                alt="İbrahim Kavüşt" 
+                className="h-28 w-auto opacity-80 md:h-24"
+              />
+            </picture>
           </div>
 
           {/* Name */}

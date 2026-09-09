@@ -61,11 +61,14 @@ export default function Navigation() {
               onClick={(e) => handleNavClick(e, '#home')}
               className="flex items-center gap-3"
             >
-              <img 
-                src={`${import.meta.env.BASE_URL}images/kavust-logo-v2.png`}
-                alt="Logo" 
-                className="h-10 w-auto opacity-90"
-              />
+              <picture>
+                <source media="(max-width: 767px)" srcSet={`${import.meta.env.BASE_URL}images/kavust-logo-mobile.png`} />
+                <img 
+                  src={`${import.meta.env.BASE_URL}images/kavust-logo-v2.png`}
+                  alt="İbrahim Kavüşt" 
+                  className="h-16 w-auto opacity-90 md:h-10"
+                />
+              </picture>
               <div className="hidden sm:block">
                 <span className="text-lg font-serif text-white/90 block leading-tight">
                   İbrahim <span className="text-gold">Kavüşt</span>
