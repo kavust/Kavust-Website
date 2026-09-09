@@ -9,6 +9,7 @@ const stats = [
 
 export default function About() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const backgroundRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -29,6 +30,30 @@ export default function About() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!sectionRef.current || !backgroundRef.current) return;
+
+      const rect = sectionRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const sectionCenter = rect.top + rect.height / 2;
+      const distanceFromCenter = Math.abs(sectionCenter - viewportHeight / 2);
+      const visibility = Math.max(0, 1 - distanceFromCenter / viewportHeight);
+      const maxOpacity = window.innerWidth >= 1024 ? 0.3 : 0.6;
+
+      backgroundRef.current.style.opacity = String(visibility * maxOpacity);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, []);
+
   return (
     <section
       id="about"
@@ -36,7 +61,8 @@ export default function About() {
       ref={sectionRef}
     >
       <div
-        className="absolute inset-x-0 top-0 h-[28rem] bg-contain bg-top bg-no-repeat opacity-60 lg:inset-0 lg:h-auto lg:bg-cover lg:bg-center lg:opacity-30"
+        ref={backgroundRef}
+        className="absolute inset-x-0 top-0 h-[28rem] bg-contain bg-top bg-no-repeat opacity-0 transition-opacity duration-300 lg:inset-0 lg:h-auto lg:bg-cover lg:bg-center"
         style={{ backgroundImage: `url(${import.meta.env.BASE_URL}images/about-wine-table.jpeg)` }}
         aria-hidden="true"
       />
