@@ -55,6 +55,7 @@ const experiences = [
 export default function Experience() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const backgroundRef = useRef<HTMLDivElement>(null);
+  const restaurantBackgroundRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -73,6 +74,31 @@ export default function Experience() {
     }
 
     return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const updateRestaurantReveal = () => {
+      const background = restaurantBackgroundRef.current;
+      if (!background) return;
+
+      const rect = background.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const entering = Math.min(1, Math.max(0, (viewportHeight - rect.top) / (viewportHeight * 0.45)));
+      const leaving = Math.min(1, Math.max(0, rect.bottom / (viewportHeight * 0.45)));
+      const visibility = Math.min(entering, leaving);
+      const maxOpacity = window.innerWidth >= 1024 ? 0.2 : 0.34;
+
+      background.style.opacity = String(visibility * maxOpacity);
+    };
+
+    updateRestaurantReveal();
+    window.addEventListener('scroll', updateRestaurantReveal, { passive: true });
+    window.addEventListener('resize', updateRestaurantReveal);
+
+    return () => {
+      window.removeEventListener('scroll', updateRestaurantReveal);
+      window.removeEventListener('resize', updateRestaurantReveal);
+    };
   }, []);
 
   useEffect(() => {
@@ -111,6 +137,12 @@ export default function Experience() {
         ref={backgroundRef}
         className="absolute inset-x-0 top-0 h-[40rem] bg-cover bg-center bg-no-repeat opacity-0 transition-opacity duration-300 lg:inset-0 lg:h-auto"
         style={{ backgroundImage: `url(${import.meta.env.BASE_URL}images/experience-wine-service.jpg)` }}
+        aria-hidden="true"
+      />
+      <div
+        ref={restaurantBackgroundRef}
+        className="absolute inset-x-0 top-[40rem] h-[42rem] bg-cover bg-center bg-no-repeat opacity-0 transition-opacity duration-500 [mask-image:linear-gradient(to_bottom,transparent_0%,black_14%,black_78%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_14%,black_78%,transparent_100%)] lg:top-[42rem] lg:h-[46rem]"
+        style={{ backgroundImage: `url(${import.meta.env.BASE_URL}images/experience-restaurant-interior.jpg)` }}
         aria-hidden="true"
       />
       <div className="absolute inset-x-0 top-0 h-[40rem] bg-gradient-to-b from-black-matte/55 via-black-matte/80 to-black-matte lg:inset-0 lg:h-auto lg:bg-black-matte/85" aria-hidden="true" />
