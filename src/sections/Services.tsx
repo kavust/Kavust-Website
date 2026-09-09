@@ -7,18 +7,21 @@ const services = [
     icon: Wine,
     title: 'Şarap Eşleştirme',
     description: 'Menünüze özel kurated şarap seçkileri ve gastronomik uyum danışmanlığı. Her şişede bir hikaye, her yudumda bir deneyim.',
+    image: 'images/service-wine-pairing.jpeg',
   },
   {
     number: '02',
     icon: UtensilsCrossed,
     title: 'Fine Dining Servis',
     description: 'Lüks restoran standartlarında, kusursuz masa servisi ve misafir deneyimi. Detaylarda gizli mükemmellik.',
+    image: 'images/service-fine-dining.jpeg',
   },
   {
     number: '03',
     icon: Sparkles,
     title: 'Eğitim & Danışmanlık',
     description: 'Profesyonel ekip eğitimleri ve restoran operasyon optimizasyonu. Bilgi ve tecrübenin aktarımı.',
+    image: 'images/service-training.webp',
   },
 ];
 
@@ -73,28 +76,34 @@ export default function Services() {
           {services.map((service, index) => (
             <div
               key={index}
-              className={`group relative p-10 border border-gold/10 hover:border-gold/30 transition-all duration-500 hover:shadow-gold bg-black-card/30 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+              className={`group relative min-h-[23rem] overflow-hidden p-10 border border-gold/10 hover:border-gold/30 transition-all duration-500 hover:shadow-gold bg-black-card/30 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
               style={{ transitionDelay: `${index * 150}ms` }}
             >
+              <img
+                src={`${import.meta.env.BASE_URL}${service.image}`}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover opacity-40 transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black-deep/55 via-black-deep/75 to-black-deep/95" />
               {/* Number */}
-              <span className="absolute top-6 right-6 text-gold/20 text-5xl font-serif">
+              <span className="absolute top-6 right-6 z-10 text-gold/40 text-5xl font-serif">
                 {service.number}
               </span>
 
               {/* Icon */}
-              <div className="mb-8">
+              <div className="relative z-10 mb-8">
                 <div className="inline-flex p-4 border border-gold/30 group-hover:border-gold/60 group-hover:bg-gold/5 transition-all duration-300">
                   <service.icon className="w-8 h-8 text-gold" />
                 </div>
               </div>
 
               {/* Title */}
-              <h3 className="text-2xl font-serif text-white mb-4 group-hover:text-gold transition-colors duration-300">
+              <h3 className="relative z-10 text-2xl font-serif text-white mb-4 group-hover:text-gold transition-colors duration-300">
                 {service.title}
               </h3>
 
               {/* Description */}
-              <p className="text-gray-400 leading-relaxed text-sm">
+              <p className="relative z-10 text-gray-300 leading-relaxed text-sm">
                 {service.description}
               </p>
 
