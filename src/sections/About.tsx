@@ -36,9 +36,9 @@ export default function About() {
 
       const rect = sectionRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
-      const sectionCenter = rect.top + rect.height / 2;
-      const distanceFromCenter = Math.abs(sectionCenter - viewportHeight / 2);
-      const visibility = Math.max(0, 1 - distanceFromCenter / viewportHeight);
+      const enterProgress = Math.min(1, Math.max(0, (viewportHeight - rect.top) / (viewportHeight * 0.5)));
+      const exitProgress = Math.min(1, Math.max(0, rect.bottom / (viewportHeight * 0.5)));
+      const visibility = Math.min(enterProgress, exitProgress);
       const maxOpacity = window.innerWidth >= 1024 ? 0.3 : 0.6;
 
       backgroundRef.current.style.opacity = String(visibility * maxOpacity);
