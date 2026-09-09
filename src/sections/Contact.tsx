@@ -21,7 +21,7 @@ const contactInfo = [
 
 const socialLinks = [
   { icon: Linkedin, label: 'LinkedIn', href: '#' },
-  { icon: Instagram, label: 'Instagram', href: '#' },
+  { icon: Instagram, label: 'Instagram', href: 'https://www.instagram.com/ibokavust/' },
 ];
 
 export default function Contact() {
