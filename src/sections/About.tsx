@@ -36,11 +36,11 @@ export default function About() {
       ref={sectionRef}
     >
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-30"
+        className="absolute inset-x-0 top-0 h-[28rem] bg-contain bg-top bg-no-repeat opacity-60 lg:inset-0 lg:h-auto lg:bg-cover lg:bg-center lg:opacity-30"
         style={{ backgroundImage: `url(${import.meta.env.BASE_URL}images/about-wine-table.jpeg)` }}
         aria-hidden="true"
       />
-      <div className="absolute inset-0 bg-black-deep/80" aria-hidden="true" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black-deep/55 via-black-deep/85 to-black-deep lg:bg-black-deep/80" aria-hidden="true" />
       {/* Decorative line */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-24 bg-gradient-to-b from-gold/50 to-transparent" />
 
