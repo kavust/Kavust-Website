@@ -62,7 +62,7 @@ export default function About() {
     >
       <div
         ref={backgroundRef}
-        className="absolute inset-x-0 top-0 h-[28rem] bg-contain bg-top bg-no-repeat opacity-0 transition-opacity duration-300 lg:inset-0 lg:h-auto lg:bg-cover lg:bg-center"
+        className="absolute inset-x-0 top-0 h-[32rem] bg-contain bg-top bg-no-repeat opacity-0 transition-opacity duration-500 [mask-image:linear-gradient(to_bottom,transparent_0%,black_16%,black_74%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_16%,black_74%,transparent_100%)] lg:inset-0 lg:h-auto lg:bg-cover lg:bg-center lg:[mask-image:none] lg:[-webkit-mask-image:none]"
         style={{ backgroundImage: `url(${import.meta.env.BASE_URL}images/about-wine-table.jpeg)` }}
         aria-hidden="true"
       />
