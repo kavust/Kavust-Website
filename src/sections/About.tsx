@@ -128,14 +128,14 @@ export default function About() {
           {/* Right side - Stats & Info */}
           <div className={`space-y-8 transition-all duration-1000 delay-400 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-3 gap-3 sm:gap-6">
               {stats.map((stat, index) => (
                 <div
                   key={index}
-                  className="text-center p-6 border border-gold/10 hover:border-gold/30 transition-all duration-500"
+                  className="min-w-0 text-center p-4 sm:p-6 border border-gold/10 hover:border-gold/30 transition-all duration-500"
                 >
                   <p className="text-4xl font-serif text-gradient-gold mb-2">{stat.value}</p>
-                  <p className="text-gray-500 text-xs tracking-wider uppercase">{stat.label}</p>
+                  <p className="break-words [overflow-wrap:anywhere] text-[10px] leading-tight tracking-wider uppercase text-gray-500 sm:text-xs">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -150,7 +150,7 @@ export default function About() {
                 {['Dedication', 'Guest Satisfaction', 'Confidence', 'Team Leadership', 'Operations Management', 'Fine Dining Service', 'Wine Expertise', 'Sommelier'].map((skill, index) => (
                   <span
                     key={index}
-                    className="px-4 py-2 border border-gold/30 text-gold/80 text-sm hover:bg-gold/10 hover:border-gold/50 transition-all duration-300"
+                    className="max-w-full break-words px-4 py-2 text-sm text-gold/80 border border-gold/30 hover:bg-gold/10 hover:border-gold/50 transition-all duration-300"
                   >
                     {skill}
                   </span>
