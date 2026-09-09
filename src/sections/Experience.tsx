@@ -86,7 +86,7 @@ export default function Experience() {
       const entering = Math.min(1, Math.max(0, (viewportHeight - rect.top) / (viewportHeight * 0.45)));
       const leaving = Math.min(1, Math.max(0, rect.bottom / (viewportHeight * 0.45)));
       const visibility = Math.min(entering, leaving);
-      const maxOpacity = window.innerWidth >= 1024 ? 0.2 : 0.34;
+      const maxOpacity = window.innerWidth >= 1024 ? 0.15 : 0.25;
 
       background.style.opacity = String(visibility * maxOpacity);
     };
@@ -141,7 +141,7 @@ export default function Experience() {
       />
       <div
         ref={restaurantBackgroundRef}
-        className="absolute inset-x-0 top-[40rem] h-[42rem] bg-cover bg-center bg-no-repeat opacity-0 transition-opacity duration-500 [mask-image:linear-gradient(to_bottom,transparent_0%,black_14%,black_78%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_14%,black_78%,transparent_100%)] lg:top-[42rem] lg:h-[46rem]"
+        className="absolute inset-x-0 top-[40rem] h-[42rem] bg-black/55 bg-cover bg-center bg-no-repeat bg-blend-multiply opacity-0 transition-opacity duration-500 [mask-image:linear-gradient(to_bottom,transparent_0%,black_14%,black_78%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_14%,black_78%,transparent_100%)] lg:top-[42rem] lg:h-[46rem]"
         style={{ backgroundImage: `url(${import.meta.env.BASE_URL}images/experience-restaurant-interior.jpg)` }}
         aria-hidden="true"
       />
