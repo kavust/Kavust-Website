@@ -113,7 +113,7 @@ export default function Navigation() {
         }`}
       >
         <div
-          className="absolute inset-0 bg-black-deep/95 backdrop-blur-xl"
+          className="absolute inset-0 bg-black-deep/60 backdrop-blur-lg"
           onClick={() => setIsMobileMenuOpen(false)}
         />
 
