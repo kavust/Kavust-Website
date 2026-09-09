@@ -108,12 +108,12 @@ export default function Navigation() {
 
       {/* Mobile Menu */}
       <div
-        className={`fixed inset-0 z-40 md:hidden transition-all duration-500 ${
+        className={`fixed inset-0 z-40 md:hidden transition-[opacity,visibility] duration-200 ease-out ${
           isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
         }`}
       >
         <div
-          className="absolute inset-0 bg-black-deep/98 backdrop-blur-md"
+          className="absolute inset-0 bg-black-deep/95 backdrop-blur-xl"
           onClick={() => setIsMobileMenuOpen(false)}
         />
 
