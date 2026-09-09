@@ -160,8 +160,8 @@ export default function Contact() {
                 </div>
               ) : (
                 <form
-  action="https://formspree.io/f/xlgwgqwb"
-  method="POST" className="space-y-6">
+  action="https://formsubmit.co/kavustyeap@gmail.com"
+  method="POST" className="space-y-6">\n                  <input type="hidden" name="_subject" value="Kavust.com — Yeni iletişim formu mesajı" />\n                  <input type="hidden" name="_template" value="table" />
                   <div className="grid sm:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-gray-500 text-xs uppercase tracking-wider mb-2">Adınız</label>
