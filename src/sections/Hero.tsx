@@ -33,7 +33,7 @@ export default function Hero() {
         <div className="absolute inset-0 bg-gradient-to-r from-black-deep via-black-deep/70 to-transparent z-10" />
         <div className="absolute inset-0 bg-gradient-to-t from-black-deep/50 via-transparent to-black-deep/30 z-10" />
         <img
-          src="https://i.postimg.cc/VkgkLxQT/IMG-7170.jpg"
+          src={`${import.meta.env.BASE_URL}images/ibrahim-kavust.jpg`}
           alt="İbrahim Kavüşt"
           className="w-full h-full object-cover object-top"
         />
@@ -45,7 +45,7 @@ export default function Hero() {
           {/* Logo - bigger */}
           <div className="mb-12 animate-fade-in">
             <img 
-              src="https://i.postimg.cc/SKrXzX0j/IMG-2091.png" 
+              src={`${import.meta.env.BASE_URL}images/kavust-logo.png`}
               alt="Logo" 
               className="h-20 w-auto opacity-90"
             />

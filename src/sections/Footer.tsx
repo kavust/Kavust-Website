@@ -23,7 +23,7 @@ export default function Footer() {
           {/* Logo - bigger */}
           <div className="mb-6">
             <img 
-              src="https://i.postimg.cc/SKrXzX0j/IMG-2091.png" 
+              src={`${import.meta.env.BASE_URL}images/kavust-logo.png`}
               alt="Logo" 
               className="h-24 w-auto opacity-80"
             />
