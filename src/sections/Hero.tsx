@@ -36,6 +36,7 @@ export default function Hero() {
           src={`${import.meta.env.BASE_URL}images/ibrahim-kavust.jpg`}
           alt="İbrahim Kavüşt"
           className="w-full h-full object-cover object-top"
+          style={{ filter: 'brightness(1.15)' }}
         />
       </div>
 
