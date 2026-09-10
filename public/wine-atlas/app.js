@@ -12,8 +12,8 @@ const copy=en?{
   'Üzümler & şaraplar':'Grapes & wines','Ülke bilgisi':'Country information',
   'Sürükle · İki parmakla yakınlaştır':'Drag · Pinch to zoom','Üzerinde gezin · Seçmek için dokun':'Hover · Tap to select',
   'Eşleşen ülke bulunamadı.':'No matching country found.','Türkiye profilini aç':'Open the Turkey profile',
-  '${t('Bu ülke veya bölge için henüz doğrulanmış bir şarap profili eklenmedi. Bu, burada şarap üretilmediği anlamına gelmez.')}':'A verified wine profile has not yet been added for this country or region. This does not mean wine is not produced here.',
-  'Keşfe devam et':'Continue exploring','${t('Altın tonundaki ülkelerde üzüm çeşitlerini, bölgeleri ve şarap stillerini inceleyebilirsin.')}':'Explore grape varieties, regions and wine styles in the countries highlighted in gold.',
+  'Bu ülke veya bölge için henüz doğrulanmış bir şarap profili eklenmedi. Bu, burada şarap üretilmediği anlamına gelmez.':'A verified wine profile has not yet been added for this country or region. This does not mean wine is not produced here.',
+  'Keşfe devam et':'Continue exploring','Altın tonundaki ülkelerde üzüm çeşitlerini, bölgeleri ve şarap stillerini inceleyebilirsin.':'Explore grape varieties, regions and wine styles in the countries highlighted in gold.',
   'Kaynak ve ayrıntılı okuma ↗':'Source & further reading ↗'
 }:{};
 const t=value=>copy[value]||value;
@@ -32,7 +32,7 @@ function renderProfile(f){
  const top=`<div class="profile-top"><span>${escapeHTML(en?f.properties.continent:(continents[f.properties.continent]||f.properties.continent))}</span><span class="country-code">${escapeHTML(code==='-99'?f.properties.id:code)}</span></div><h2>${escapeHTML(name(f))}</h2>`;
  let body;
  if(p){body=`<p class="profile-summary">${escapeHTML(p.summary)}</p><section class="profile-section"><h3 class="section-label">${t('Öne çıkan üzümler')}</h3><div class="grapes">${p.grapes.map(g=>`<span class="grape ${g.color==='r'?'red':''}"><i aria-hidden="true"></i>${escapeHTML(g.name)}</span>`).join('')}</div></section><section class="profile-section"><h3 class="section-label">${t('Şarap bölgeleri')}</h3><div class="region-list">${p.regions.map(r=>`<span>${escapeHTML(r)}</span>`).join('')}</div></section><section class="profile-section"><h3 class="section-label">${t('Şarapları tanı')}</h3>${p.wines.map(w=>`<article class="wine-card"><strong>${escapeHTML(w.name)}</strong><p>${escapeHTML(w.note)}</p></article>`).join('')}</section><a class="source-link" href="${escapeHTML(p.source)}" target="_blank" rel="noreferrer">${t('Kaynak ve ayrıntılı okuma ↗')}</a>`;
- }else{body=`<div class="empty-profile">Bu ülke veya bölge için henüz doğrulanmış bir şarap profili eklenmedi. Bu, burada şarap üretilmediği anlamına gelmez.</div><section class="profile-section"><h3 class="section-label">${t('Keşfe devam et')}</h3><p class="profile-summary">Altın tonundaki ülkelerde üzüm çeşitlerini, bölgeleri ve şarap stillerini inceleyebilirsin.</p><button class="nearby" id="back-turkey">${t('Türkiye profilini aç')}</button></section>`;}
+ }else{body=`<div class="empty-profile">${t('Bu ülke veya bölge için henüz doğrulanmış bir şarap profili eklenmedi. Bu, burada şarap üretilmediği anlamına gelmez.')}</div><section class="profile-section"><h3 class="section-label">${t('Keşfe devam et')}</h3><p class="profile-summary">${t('Altın tonundaki ülkelerde üzüm çeşitlerini, bölgeleri ve şarap stillerini inceleyebilirsin.')}</p><button class="nearby" id="back-turkey">${t('Türkiye profilini aç')}</button></section>`;}
  $('#profile').innerHTML=top+body;
  $('#profile').classList.remove('profile-enter');void $('#profile').offsetWidth;$('#profile').classList.add('profile-enter');
  $('.country-panel').scrollTop=0;
