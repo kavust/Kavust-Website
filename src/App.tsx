@@ -47,7 +47,7 @@ function App() {
         <Services />
         <About />
         <Experience />
-        <WineAtlas />
+        <WineAtlas language={language} />
         <Contact />
       </main>
       <Footer />
