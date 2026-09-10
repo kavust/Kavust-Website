@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Mail, Send, Linkedin, Instagram } from 'lucide-react';
+import { Mail, Send, Facebook, Linkedin, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,7 +14,8 @@ const contactInfo = [
 ];
 
 const socialLinks = [
-  { icon: Linkedin, label: 'LinkedIn', href: '#' },
+  { icon: Facebook, label: 'Facebook', href: 'https://www.facebook.com/kavusting' },
+  { icon: Linkedin, label: 'LinkedIn', href: 'https://www.linkedin.com/in/ibrahim-kav%C3%BC%C5%9Ft-867986244?utm_source=share_via&utm_content=profile&utm_medium=member_ios' },
   { icon: Instagram, label: 'Instagram', href: 'https://www.instagram.com/ibokavust/' },
 ];
 
@@ -147,6 +148,8 @@ export default function Contact() {
                   <a
                     key={index}
                     href={social.href}
+                    target="_blank"
+                    rel="noreferrer"
                     className="p-4 border border-gold/20 text-gray-400 hover:text-gold hover:border-gold/50 hover:bg-gold/5 transition-all duration-300"
                     aria-label={social.label}
                   >
