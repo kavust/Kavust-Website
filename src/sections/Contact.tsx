@@ -88,6 +88,16 @@ export default function Contact() {
       className="relative w-full py-32 overflow-hidden bg-black-deep"
       ref={sectionRef}
     >
+      <div className={`absolute inset-0 pointer-events-none transition-opacity duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`} aria-hidden="true">
+        <div
+          className="absolute inset-0 bg-cover bg-center sm:bg-[position:center]"
+          style={{ backgroundImage: "url('/images/contact-decanting.svg')" }}
+        />
+        <div className="absolute inset-0 bg-black/75" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black-deep via-black/65 to-black-deep" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black-deep/65 via-transparent to-black-deep/55" />
+      </div>
+
       {/* Decorative elements */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-24 bg-gradient-to-b from-gold/50 to-transparent" />
       <div className="absolute top-1/4 right-0 w-px h-64 bg-gradient-to-b from-transparent via-gold/10 to-transparent" />
