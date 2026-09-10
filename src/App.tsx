@@ -5,6 +5,7 @@ import Services from './sections/Services';
 import About from './sections/About';
 import Experience from './sections/Experience';
 import Contact from './sections/Contact';
+import WineAtlas from './sections/WineAtlas';
 import Footer from './sections/Footer';
 import { translatePage } from './i18n';
 import type { Language } from './i18n';
@@ -46,6 +47,7 @@ function App() {
         <Services />
         <About />
         <Experience />
+        <WineAtlas />
         <Contact />
       </main>
       <Footer />
