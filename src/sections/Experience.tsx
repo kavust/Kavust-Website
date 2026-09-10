@@ -3,52 +3,34 @@ import { Briefcase, Calendar, MapPin } from 'lucide-react';
 
 const experiences = [
   {
-    title: 'Service Manager',
     company: 'The Barrel Bistro and Wine Bar',
     location: 'San Mateo, CA - USA',
     period: 'Nisan 2023 - Günümüz',
-    description: 'Restoran operasyonlarının yönetimi, ekip koordinasyonu ve misafir deneyiminin optimize edilmesi.',
-    current: true,
   },
   {
-    title: 'Supervisor',
     company: 'Dubai Le Meridien Mina Seyahi Beach Resort & Waterpark',
     location: 'Dubai, Birleşik Arap Emirlikleri',
     period: 'Kasım 2021 - Nisan 2023',
-    description: 'Marriott International bünyesinde lüks resort otelin F&B operasyonlarının yönetimi.',
-    current: false,
   },
   {
-    title: 'Supervisor',
     company: 'EXPO 2020 - Marriott International',
     location: 'Dubai, Birleşik Arap Emirlikleri',
     period: 'Kasım 2021 - Mart 2022',
-    description: 'Dünya Expo\'sunda uluslararası misafirler için premium hizmet standartlarının uygulanması.',
-    current: false,
   },
   {
-    title: 'Restaurant Manager',
     company: 'Esen Tourism Management and Trade',
     location: 'Kuşadası, Aydın - Türkiye',
     period: 'Temmuz 2021 - Ekim 2021',
-    description: 'Sezonluk restoran operasyonlarının tam yönetimi ve ekip liderliği.',
-    current: false,
   },
   {
-    title: 'Restaurant Captain / Head Waiter',
     company: 'Cestur Cesme Reconstruction Tourism',
     location: 'Çeşme, İzmir - Türkiye',
     period: 'Ağustos 2019 - Temmuz 2021',
-    description: 'Fine dining restoranda masa servisi ekibinin liderliği ve misafir ilişkileri yönetimi.',
-    current: false,
   },
   {
-    title: 'Tourism and Hospitality Staff',
     company: 'Inter Turquoise Travel',
     location: 'Menderes, İzmir - Türkiye',
     period: 'Temmuz 2017 - Eylül 2017',
-    description: 'Turizm sektöründe ilk deneyim ve misafir hizmetleri temelleri.',
-    current: false,
   },
 ];
 
@@ -183,26 +165,14 @@ export default function Experience() {
                 {/* Left side (odd items) / Right side (even items) */}
                 <div className={`${index % 2 === 0 ? 'lg:text-right lg:pr-16' : 'lg:col-start-2 lg:pl-16'}`}>
                   <div className="group p-8 border border-gold/10 hover:border-gold/30 transition-all duration-500 hover:shadow-gold bg-black-card/30">
-                    {/* Current badge */}
-                    {exp.current && (
-                      <span className="inline-block px-3 py-1 bg-gold/10 text-gold text-xs tracking-wider uppercase mb-4">
-                        Mevcut
-                      </span>
-                    )}
-
-                    {/* Title */}
-                    <h3 className="text-2xl font-serif text-white mb-2 group-hover:text-gold transition-colors">
-                      {exp.title}
-                    </h3>
-
                     {/* Company */}
                     <div className="flex items-center gap-2 mb-4 lg:justify-start">
                       <Briefcase className="w-4 h-4 text-gold/60" />
-                      <span className="text-gold-light font-medium">{exp.company}</span>
+                      <h3 className="text-gold-light font-medium">{exp.company}</h3>
                     </div>
 
                     {/* Meta info */}
-                    <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-500">
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3.5 h-3.5" />
                         <span>{exp.period}</span>
@@ -213,10 +183,6 @@ export default function Experience() {
                       </div>
                     </div>
 
-                    {/* Description */}
-                    <p className="text-gray-400 text-sm leading-relaxed">
-                      {exp.description}
-                    </p>
                   </div>
                 </div>
 
