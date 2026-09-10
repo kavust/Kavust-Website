@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Mail, Phone, Send, Linkedin, Instagram } from 'lucide-react';
+import { Mail, Send, Linkedin, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,12 +10,6 @@ const contactInfo = [
     label: 'E-posta',
     value: 'kavustyeap@gmail.com',
     href: 'mailto:kavustyeap@gmail.com',
-  },
-  {
-    icon: Phone,
-    label: 'Telefon',
-    value: '+1 (628) 946 5349',
-    href: 'tel:+16289465349',
   },
 ];
 
