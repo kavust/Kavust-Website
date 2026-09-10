@@ -61,6 +61,10 @@ export default function Footer() {
           <p className="text-gray-600 text-xs tracking-wider">
             © 2024 İbrahim Kavüşt. Tüm hakları saklıdır.
           </p>
+          <p className="mt-3 text-gray-500 text-[10px]">
+            <a href="https://sketchfab.com/3d-models/burj-khalifa-59e6dd74e5f647158de568b5a7f9cab7" target="_blank" rel="noreferrer">Burj Khalifa — ManySince910</a>
+            {' · '}<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a>
+          </p>
         </div>
 
         {/* Back to top button */}
