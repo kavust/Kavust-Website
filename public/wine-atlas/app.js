@@ -86,7 +86,9 @@ async function init(){
   $('#zoom-in').onclick=()=>svg.transition().duration(reduced?0:300).call(zoom.scaleBy,1.7);
   $('#zoom-out').onclick=()=>svg.transition().duration(reduced?0:300).call(zoom.scaleBy,1/1.7);
   const reset=()=>svg.transition().duration(reduced?0:650).call(zoom.transform,d3.zoomIdentity);
-  $('#reset').onclick=reset;$('.brand').onclick=e=>{e.preventDefault();reset();};
+  $('#reset').onclick=reset;
+  const brand=$('.brand');
+  if(brand)brand.onclick=e=>{e.preventDefault();reset();};
   document.querySelectorAll('[data-country]').forEach(b=>b.onclick=()=>select(b.dataset.country,true));
   $('#search').addEventListener('input',search);$('#search').addEventListener('focus',search);
   $('#search').addEventListener('keydown',e=>{if(e.key==='Escape')closeSearch();if(e.key==='ArrowDown'){e.preventDefault();$('#results button')?.focus();}if(e.key==='Enter')$('#results button')?.click();});
