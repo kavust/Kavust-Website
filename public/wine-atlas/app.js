@@ -5,7 +5,21 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const continents={'Asia':'Asya','Europe':'Avrupa','Africa':'Afrika','North America':'Kuzey Amerika','South America':'Güney Amerika','Oceania':'Okyanusya','Antarctica':'Antarktika','Seven seas (open ocean)':'Okyanus adaları'};
 let countries=[],profiles={},byId=new Map(),selected='TUR',hovered=null,mode='explore',transform,projection,path,zoom,svg,paths,micros;
 const pointers=new Set();let multi=false,lastTouch=null;
-function name(f){return f.properties.id==='TUR'?'Türkiye':f.properties.tr||f.properties.name;}
+const lang=new URLSearchParams(location.search).get('lang')==='en'?'en':'tr';
+const en=lang==='en';
+const copy=en?{
+  'Öne çıkan üzümler':'Signature grapes','Şarap bölgeleri':'Wine regions','Şarapları tanı':'Discover the wines',
+  'Üzümler & şaraplar':'Grapes & wines','Ülke bilgisi':'Country information',
+  'Sürükle · İki parmakla yakınlaştır':'Drag · Pinch to zoom','Üzerinde gezin · Seçmek için dokun':'Hover · Tap to select',
+  'Eşleşen ülke bulunamadı.':'No matching country found.','Türkiye profilini aç':'Open the Turkey profile',
+  '${t('Bu ülke veya bölge için henüz doğrulanmış bir şarap profili eklenmedi. Bu, burada şarap üretilmediği anlamına gelmez.')}':'A verified wine profile has not yet been added for this country or region. This does not mean wine is not produced here.',
+  'Keşfe devam et':'Continue exploring','${t('Altın tonundaki ülkelerde üzüm çeşitlerini, bölgeleri ve şarap stillerini inceleyebilirsin.')}':'Explore grape varieties, regions and wine styles in the countries highlighted in gold.',
+  'Kaynak ve ayrıntılı okuma ↗':'Source & further reading ↗'
+}:{};
+const t=value=>copy[value]||value;
+const countryNames=en?{Türkiye:'Turkey',ABD:'United States',Gürcistan:'Georgia'}:{};
+
+function name(f){const value=f.properties.id==='TUR'?'Türkiye':f.properties.tr||f.properties.name;return countryNames[value]||value;}
 function fold(s){return s.toLocaleLowerCase('tr').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i');}
 function updateClasses(){paths.classed('selected',d=>d.properties.id===selected).classed('hovered',d=>d.properties.id===hovered);micros.classed('selected',d=>d.properties.id===selected).classed('hovered',d=>d.properties.id===hovered);}
 function mark(){
@@ -15,10 +29,10 @@ function mark(){
 }
 function renderProfile(f){
  const p=profiles[f.properties.id],code=f.properties.iso;
- const top=`<div class="profile-top"><span>${escapeHTML(continents[f.properties.continent]||f.properties.continent)}</span><span class="country-code">${escapeHTML(code==='-99'?f.properties.id:code)}</span></div><h2>${escapeHTML(name(f))}</h2>`;
+ const top=`<div class="profile-top"><span>${escapeHTML(en?f.properties.continent:(continents[f.properties.continent]||f.properties.continent))}</span><span class="country-code">${escapeHTML(code==='-99'?f.properties.id:code)}</span></div><h2>${escapeHTML(name(f))}</h2>`;
  let body;
- if(p){body=`<p class="profile-summary">${escapeHTML(p.summary)}</p><section class="profile-section"><h3 class="section-label">Öne çıkan üzümler</h3><div class="grapes">${p.grapes.map(g=>`<span class="grape ${g.color==='r'?'red':''}"><i aria-hidden="true"></i>${escapeHTML(g.name)}</span>`).join('')}</div></section><section class="profile-section"><h3 class="section-label">Şarap bölgeleri</h3><div class="region-list">${p.regions.map(r=>`<span>${escapeHTML(r)}</span>`).join('')}</div></section><section class="profile-section"><h3 class="section-label">Şarapları tanı</h3>${p.wines.map(w=>`<article class="wine-card"><strong>${escapeHTML(w.name)}</strong><p>${escapeHTML(w.note)}</p></article>`).join('')}</section><a class="source-link" href="${escapeHTML(p.source)}" target="_blank" rel="noreferrer">Kaynak ve ayrıntılı okuma ↗</a>`;
- }else{body=`<div class="empty-profile">Bu ülke veya bölge için henüz doğrulanmış bir şarap profili eklenmedi. Bu, burada şarap üretilmediği anlamına gelmez.</div><section class="profile-section"><h3 class="section-label">Keşfe devam et</h3><p class="profile-summary">Altın tonundaki ülkelerde üzüm çeşitlerini, bölgeleri ve şarap stillerini inceleyebilirsin.</p><button class="nearby" id="back-turkey">Türkiye profilini aç</button></section>`;}
+ if(p){body=`<p class="profile-summary">${escapeHTML(p.summary)}</p><section class="profile-section"><h3 class="section-label">${t('Öne çıkan üzümler')}</h3><div class="grapes">${p.grapes.map(g=>`<span class="grape ${g.color==='r'?'red':''}"><i aria-hidden="true"></i>${escapeHTML(g.name)}</span>`).join('')}</div></section><section class="profile-section"><h3 class="section-label">${t('Şarap bölgeleri')}</h3><div class="region-list">${p.regions.map(r=>`<span>${escapeHTML(r)}</span>`).join('')}</div></section><section class="profile-section"><h3 class="section-label">${t('Şarapları tanı')}</h3>${p.wines.map(w=>`<article class="wine-card"><strong>${escapeHTML(w.name)}</strong><p>${escapeHTML(w.note)}</p></article>`).join('')}</section><a class="source-link" href="${escapeHTML(p.source)}" target="_blank" rel="noreferrer">${t('Kaynak ve ayrıntılı okuma ↗')}</a>`;
+ }else{body=`<div class="empty-profile">Bu ülke veya bölge için henüz doğrulanmış bir şarap profili eklenmedi. Bu, burada şarap üretilmediği anlamına gelmez.</div><section class="profile-section"><h3 class="section-label">${t('Keşfe devam et')}</h3><p class="profile-summary">Altın tonundaki ülkelerde üzüm çeşitlerini, bölgeleri ve şarap stillerini inceleyebilirsin.</p><button class="nearby" id="back-turkey">${t('Türkiye profilini aç')}</button></section>`;}
  $('#profile').innerHTML=top+body;
  $('#profile').classList.remove('profile-enter');void $('#profile').offsetWidth;$('#profile').classList.add('profile-enter');
  $('.country-panel').scrollTop=0;
@@ -39,7 +53,7 @@ function focusCountry(f){
 function showHover(f,event){
  const id=f?.properties.id||null;if(hovered!==id){hovered=id;updateClasses();}
  const box=$('#hover');if(!f){box.hidden=true;return;}
- box.innerHTML=`${escapeHTML(name(f))}<small>${profiles[id]?'Üzümler & şaraplar':'Ülke bilgisi'}</small>`;box.hidden=false;
+ box.innerHTML=`${escapeHTML(name(f))}<small>${profiles[id]?t('Üzümler & şaraplar'):t('Ülke bilgisi')}</small>`;box.hidden=false;
  const stage=$('#stage').getBoundingClientRect(),w=box.offsetWidth;
  box.style.left=Math.max(7,Math.min(stage.width-w-7,event.clientX-stage.left+12))+'px';
  box.style.top=Math.max(5,Math.min(stage.height-65,event.clientY-stage.top-(event.pointerType==='touch'?82:60)))+'px';
@@ -50,10 +64,37 @@ function search(){
  const query=fold($('#search').value.trim());const list=countries.filter(f=>!query||fold(name(f)+' '+f.properties.name+' '+f.properties.iso).includes(query)).sort((a,b)=>name(a).localeCompare(name(b),'tr')).slice(0,40);
  const root=$('#results');root.innerHTML='';
  for(const f of list){const li=document.createElement('li');li.setAttribute('role','option');const b=document.createElement('button');b.type='button';b.innerHTML=`<span>${escapeHTML(name(f))}</span>${profiles[f.properties.id]?'<small>Şarap profili</small>':''}`;b.onclick=()=>select(f.properties.id,true);li.append(b);root.append(li);}
- if(!list.length){const li=document.createElement('li');li.textContent='Eşleşen ülke bulunamadı.';li.style.padding='14px';root.append(li);}
+ if(!list.length){const li=document.createElement('li');li.textContent=t('Eşleşen ülke bulunamadı.');li.style.padding='14px';root.append(li);}
  root.hidden=false;$('#search').setAttribute('aria-expanded','true');
 }
-function setMode(next){mode=next;for(const [id,value]of [['explore','explore'],['pan','pan']]){const b=$('#'+id);b.classList.toggle('active',mode===value);b.setAttribute('aria-pressed',String(mode===value));}$('#map').style.cursor=mode==='pan'?'grab':'';$('#gesture-hint').textContent=mode==='pan'?'Sürükle · İki parmakla yakınlaştır':'Üzerinde gezin · Seçmek için dokun';}
+function setMode(next){mode=next;for(const [id,value]of [['explore','explore'],['pan','pan']]){const b=$('#'+id);b.classList.toggle('active',mode===value);b.setAttribute('aria-pressed',String(mode===value));}$('#map').style.cursor=mode==='pan'?'grab':'';$('#gesture-hint').textContent=mode==='pan'?t('Sürükle · İki parmakla yakınlaştır'):t('Üzerinde gezin · Seçmek için dokun');}
+function applyLanguage(){
+ if(!en)return;
+ document.documentElement.lang='en';
+ document.title='World Wine Atlas · İbrahim Kavüşt';
+ $('.eyebrow').textContent='VINEYARDS OF THE WORLD';
+ $('.intro h1').innerHTML='World <em>Wine Atlas</em>';
+ $('.intro-copy').innerHTML='Touch a country.<br>Discover its grapes and wines.';
+ $('.map-side').setAttribute('aria-label','Interactive world map');
+ $('#search').placeholder='Search countries…'; $('#search').setAttribute('aria-label','Search countries');
+ $('#explore').textContent='Explore'; $('#pan').textContent='Move';
+ $('#map').setAttribute('aria-label','Countries of the world. You can also select countries using the search field.');
+ $('#zoom-in').setAttribute('aria-label','Zoom in');$('#zoom-out').setAttribute('aria-label','Zoom out');$('#reset').setAttribute('aria-label','Return to world view');
+ document.querySelector('.wine-key').parentElement.lastChild.textContent=' Wine profile';
+ document.querySelector('.legend span:nth-child(2)').lastChild.textContent=' Other countries';
+ $('#gesture-hint').textContent=t('Üzerinde gezin · Seçmek için dokun');
+ const labels={Türkiye:'Turkey',Fransa:'France',İtalya:'Italy',ABD:'United States',Gürcistan:'Georgia',Arjantin:'Argentina',Avustralya:'Australia'};
+ document.querySelectorAll('[data-country]').forEach(button=>{button.textContent=labels[button.textContent]||button.textContent;});
+ $('#coverage').textContent='All countries · Selected wine profiles';
+ const details=document.querySelector('.notes details');
+ details.querySelector('summary').textContent='About this map and its content';
+ const notes=details.querySelectorAll('p');
+ notes[0].innerHTML='Country and regional boundaries: <a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noreferrer">Natural Earth</a>. Dependent territories are included; boundaries do not express a legal view. Smaller countries can be selected from the search field.';
+ notes[1].textContent='Wines, grape varieties and regions are a representative selection, not a catalogue of every producer or wine. A missing profile does not mean that wine is not produced there.';
+ notes[2].textContent='Map: public domain. D3: ISC licence. Text is summarised for this atlas.';
+}
+applyLanguage();
+
 async function init(){
  try{
   if(typeof d3==='undefined')throw Error('Map library unavailable');
@@ -94,10 +135,10 @@ async function init(){
   $('#search').addEventListener('keydown',e=>{if(e.key==='Escape')closeSearch();if(e.key==='ArrowDown'){e.preventDefault();$('#results button')?.focus();}if(e.key==='Enter')$('#results button')?.click();});
   $('#results').addEventListener('keydown',e=>{const buttons=[...$('#results').querySelectorAll('button')],i=buttons.indexOf(document.activeElement);if(e.key==='ArrowDown'){e.preventDefault();buttons[(i+1)%buttons.length]?.focus();}if(e.key==='ArrowUp'){e.preventDefault();buttons[(i-1+buttons.length)%buttons.length]?.focus();}if(e.key==='Escape'){$('#search').focus();closeSearch();}});
   document.addEventListener('pointerdown',e=>{if(!e.target.closest('.search-wrap'))closeSearch();});
-  $('#coverage').textContent=`${countries.length} ülke ve bölge · ${Object.keys(profiles).length} şarap profili`;
+  $('#coverage').textContent=en?`${countries.length} countries & territories · ${Object.keys(profiles).length} wine profiles`:`${countries.length} ülke ve bölge · ${Object.keys(profiles).length} şarap profili`;
   $('#load-state').hidden=true;select('TUR');
   if(document.modelContext?.registerTool){try{document.modelContext.registerTool({name:'explore_wine_country',description:'Select a country on the wine atlas and show its grapes, wine styles and regions.',inputSchema:{type:'object',properties:{country:{type:'string',description:'Country name or three-letter code, for example TUR or Türkiye'}},required:['country'],additionalProperties:false},execute:input=>{if(typeof input?.country!=='string')throw Error('country is required');const f=countries.find(f=>f.properties.id===input.country.toUpperCase()||fold(name(f))===fold(input.country)||fold(f.properties.name)===fold(input.country));if(!f)throw Error('Country not found');select(f.properties.id,true);return {country:name(f),profile:profiles[f.properties.id]||null};}});}catch{/* Browser support is optional. */}}
- }catch(error){$('#load-state').innerHTML='Harita yüklenemedi.<br><button id="retry">Tekrar dene</button>';$('#retry').onclick=()=>location.reload();console.error(error);}
+ }catch(error){$('#load-state').innerHTML=en?'The map could not load.<br><button id="retry">Try again</button>':'Harita yüklenemedi.<br><button id="retry">Tekrar dene</button>';$('#retry').onclick=()=>location.reload();console.error(error);}
 }
 init();
 
