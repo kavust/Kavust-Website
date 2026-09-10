@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import type { Language } from '@/i18n';
 
-export default function WineAtlas() {
+export default function WineAtlas({ language }: { language: Language }) {
   const section = useRef<HTMLElement>(null);
   const frame = useRef<HTMLIFrameElement>(null);
   const [load, setLoad] = useState(false);
@@ -34,9 +35,9 @@ export default function WineAtlas() {
     <section ref={section} id="wine-atlas" aria-label="Dünya Şarap Atlası" className="relative w-full bg-black-deep scroll-mt-28">
       {load ? <iframe
         ref={frame}
-        src={`${import.meta.env.BASE_URL}wine-atlas/index.html`}
+        src={`${import.meta.env.BASE_URL}wine-atlas/index.html?lang=${language}`}
         title="Dünya Şarap Atlası — ülkeler, üzümler ve şarap bölgeleri"
-        style={{ width: '100%', height, display: 'block', border: 0 }}
+        style={{ width: '100%', height, display: 'block', border: 0, touchAction: 'pan-y' }}
       /> : <div style={{ minHeight: 600 }} aria-hidden="true" />}
     </section>
   );
