@@ -5,6 +5,7 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const continents={'Asia':'Asya','Europe':'Avrupa','Africa':'Afrika','North America':'Kuzey Amerika','South America':'Güney Amerika','Oceania':'Okyanusya','Antarctica':'Antarktika','Seven seas (open ocean)':'Okyanus adaları'};
 let countries=[],profiles={},byId=new Map(),selected='TUR',hovered=null,mode='explore',transform,projection,path,zoom,svg,paths,micros;
 const pointers=new Set();let multi=false,lastTouch=null;
+const atlasBase=`${import.meta.env.BASE_URL}wine-atlas/`;
 const lang=root.dataset.lang==='en'?'en':'tr';
 const en=lang==='en';
 const copy=en?{
@@ -99,7 +100,7 @@ async function init(){
  try{
   if(typeof d3==='undefined')throw Error('Map library unavailable');
   const get=async url=>{const r=await fetch(url);if(!r.ok)throw Error(url);return r.json();};
-  const [world,data]=await Promise.all([get('world.json'),get('profiles.json')]);
+  const [world,data]=await Promise.all([get(atlasBase+'world.json'),get(atlasBase+'profiles.json')]);
   countries=world.features;profiles=data;byId=new Map(countries.map(f=>[f.properties.id,f]));
   // D3 spherical paths expect clockwise exterior rings.
   for(const f of countries){const polys=f.geometry.type==='Polygon'?[f.geometry.coordinates]:f.geometry.coordinates;for(const coordinates of polys){if(d3.geoArea({type:'Polygon',coordinates})>2*Math.PI)coordinates.forEach(r=>r.reverse());}}
