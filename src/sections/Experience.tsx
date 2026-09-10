@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Briefcase, Calendar } from 'lucide-react';
-import LandmarkIcon from '../components/LandmarkIcon';
-import BurjIcon from '../components/BurjIcon';
+import { Briefcase, Calendar, MapPin } from 'lucide-react';
 
 const experiences = [
   {
@@ -210,7 +208,7 @@ export default function Experience() {
                         <span>{exp.period}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        {exp.location.includes('Dubai') ? <BurjIcon /> : <LandmarkIcon kind={exp.location.includes('USA') ? 'usa' : 'izmir'} />}
+                        <MapPin className="w-3.5 h-3.5" />
                         <span>{exp.location}</span>
                       </div>
                     </div>
