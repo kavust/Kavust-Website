@@ -19,10 +19,32 @@ const copy=en?{
 }:{};
 const t=value=>copy[value]||value;
 const countryNames=en?{Türkiye:'Turkey',ABD:'United States',Gürcistan:'Georgia'}:{};
+const regionalWineMap={
+ FRA:[['Bordeaux',[-0.58,44.84],['Bordeaux blends','Cabernet Sauvignon & Merlot']],['Bourgogne',[4.84,47.05],['Pinot Noir','Chardonnay']],['Champagne',[4.03,49.26],['Champagne','Traditional-method sparkling wine']],['Loire',[0.1,47.3],['Sauvignon Blanc','Chenin Blanc']],['Rhône',[4.8,44.2],['Syrah','Grenache blends']],['Alsace',[7.35,48.1],['Riesling','Gewürztraminer']]],
+ ITA:[['Piemonte',[8.05,44.7],['Barolo','Barbaresco']],['Toscana',[11.2,43.5],['Chianti Classico','Brunello di Montalcino']],['Veneto',[11.9,45.5],['Prosecco','Amarone']],['Sicilia',[14.0,37.5],['Nero d’Avola','Etna wines']]],
+ TUR:[['Trakya',[27.0,41.0],['Cabernet blends','Papazkarası']],['Ege',[27.0,38.2],['Bornova Misketi','Syrah']],['Kapadokya',[34.7,38.6],['Emir','Narince']],['Elazığ',[39.2,38.7],['Öküzgözü','Boğazkere']]],
+ USA:[['Napa Valley',[-122.3,38.5],['Cabernet Sauvignon','Chardonnay']],['Sonoma',[-122.9,38.4],['Pinot Noir','Zinfandel']],['Willamette Valley',[-123.1,45.3],['Pinot Noir','Chardonnay']],['Finger Lakes',[-76.8,42.7],['Riesling','Cabernet Franc']]],
+ ESP:[['Rioja',[-2.5,42.5],['Tempranillo','Reserva reds']],['Ribera del Duero',[-3.7,41.6],['Tempranillo','Crianza reds']],['Rías Baixas',[-8.6,42.4],['Albariño','Atlantic whites']],['Jerez',[-6.1,36.7],['Fino','Oloroso Sherry']]],
+ PRT:[['Douro',[-7.8,41.2],['Port','Douro reds']],['Vinho Verde',[-8.4,41.7],['Vinho Verde','Alvarinho']],['Dão',[-7.9,40.5],['Touriga Nacional','Encruzado']]],
+ ARG:[['Mendoza',[-69.1,-32.9],['Malbec','Cabernet Sauvignon']],['Uco Valley',[-69.3,-33.7],['High-altitude Malbec','Chardonnay']],['Salta',[-65.4,-24.8],['Torrontés','Malbec']]],
+ CHL:[['Maipo',[-70.7,-33.6],['Cabernet Sauvignon','Carménère']],['Colchagua',[-71.1,-34.6],['Carménère','Syrah']],['Casablanca',[-71.4,-33.3],['Sauvignon Blanc','Chardonnay']]],
+ AUS:[['Barossa Valley',[139.0,-34.5],['Shiraz','Grenache']],['Margaret River',[115.1,-33.9],['Cabernet Sauvignon','Chardonnay']],['Hunter Valley',[151.3,-32.8],['Semillon','Shiraz']]],
+ NZL:[['Marlborough',[173.8,-41.5],['Sauvignon Blanc','Pinot Noir']],['Central Otago',[169.2,-45.0],['Pinot Noir','Riesling']],['Hawke’s Bay',[176.8,-39.6],['Syrah','Bordeaux blends']]],
+ DEU:[['Mosel',[6.9,49.9],['Riesling','Spätlese']],['Rheingau',[8.1,50.0],['Riesling','Spätburgunder']],['Pfalz',[8.1,49.3],['Riesling','Pinot Noir']]],
+ ZAF:[['Stellenbosch',[18.86,-33.94],['Cabernet Sauvignon','Chenin Blanc']],['Swartland',[18.77,-33.4],['Syrah','Chenin Blanc']],['Constantia',[18.45,-34.03],['Vin de Constance','Sauvignon Blanc']]]
+};
 
 function name(f){const value=f.properties.id==='TUR'?'Türkiye':f.properties.tr||f.properties.name;return countryNames[value]||value;}
 function fold(s){return s.toLocaleLowerCase('tr').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i');}
 function updateClasses(){paths.classed('selected',d=>d.properties.id===selected).classed('hovered',d=>d.properties.id===hovered);micros.classed('selected',d=>d.properties.id===selected).classed('hovered',d=>d.properties.id===hovered);}
+function renderRegions(){
+ const data=regionalWineMap[selected]||[];const group=d3.select('#wine-regions');group.selectAll('*').remove();
+ if(!data.length)return;
+ group.selectAll('g').data(data).join('g').attr('class','wine-region').attr('transform',d=>{const p=projection(d[1]);return `translate(${p[0]},${p[1]})`;}).on('click',(event,d)=>{event.stopPropagation();showRegion(d,event);}).each(function(d){const g=d3.select(this);g.append('circle').attr('r',6);g.append('circle').attr('r',2.1);g.append('text').attr('x',9).attr('y',4).text(d[0]);});
+}
+function showRegion(region,event){
+ const card=$('#region-card');card.innerHTML=`<strong>${escapeHTML(region[0])}</strong><span>${region[2].map(escapeHTML).join(' · ')}</span>`;card.hidden=false;const stage=$('#stage').getBoundingClientRect(),w=card.offsetWidth;card.style.left=Math.max(8,Math.min(stage.width-w-8,event.clientX-stage.left+12))+'px';card.style.top=Math.max(8,Math.min(stage.height-64,event.clientY-stage.top-58))+'px';
+}
 function mark(){
  const f=byId.get(selected),p=projection(f.properties.point);if(!p)return;
  const g=d3.select('#marker');g.selectAll('*').remove();g.attr('transform',`translate(${p[0]},${p[1]}) scale(${1/transform.k})`);
@@ -41,7 +63,7 @@ function renderProfile(f){
 }
 function select(id,focus=false){
  const f=byId.get(id);if(!f)return false;
- selected=id;renderProfile(f);updateClasses();mark();
+ selected=id;renderProfile(f);updateClasses();mark();if(focus)renderRegions();else d3.select('#wine-regions').selectAll('*').remove();
  const [lng,lat]=f.properties.point;$('#position').textContent=`${Math.abs(lat).toFixed(2)}° ${lat>=0?'N':'S'} / ${Math.abs(lng).toFixed(2)}° ${lng>=0?'E':'W'}`;
  root.querySelectorAll('[data-country]').forEach(b=>{b.classList.toggle('selected',b.dataset.country===id);b.setAttribute('aria-pressed',String(b.dataset.country===id));});
  $('#search').value='';closeSearch();if(focus)focusCountry(f);return true;
@@ -115,15 +137,15 @@ async function init(){
    if(e.type==='dblclick')return false;
    if(e.type.startsWith('touch'))return mode==='pan'||e.touches.length>1;
    return mode==='pan'&&!e.button;
-  }).on('zoom',e=>{transform=e.transform;d3.select('#geography').attr('transform',transform);micros.attr('r',2.2/Math.sqrt(transform.k));mark();$('#hover').hidden=true;});
+  }).on('zoom',e=>{transform=e.transform;d3.select('#geography').attr('transform',transform);micros.attr('r',2.2/Math.sqrt(transform.k));mark();$('#hover').hidden=true;$('#region-card').hidden=true;});
   svg.call(zoom).on('dblclick.zoom',null);
   const map=$('#map');
   map.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;pointers.add(e.pointerId);if(pointers.size>1)multi=true;if(mode==='explore'&&!multi){lastTouch=featureAt(e);showHover(lastTouch,e);}if(e.target.hasPointerCapture?.(e.pointerId))e.target.releasePointerCapture(e.pointerId);});
   map.addEventListener('pointermove',e=>{if(mode==='pan'||multi)return;if(e.pointerType==='mouse'||pointers.has(e.pointerId)){const f=featureAt(e);showHover(f,e);if(e.pointerType!=='mouse')lastTouch=f;}});
-  window.addEventListener('pointerup',e=>{if(!pointers.has(e.pointerId))return;if(!multi&&mode==='explore'&&lastTouch)select(lastTouch.properties.id);pointers.delete(e.pointerId);if(!pointers.size){multi=false;lastTouch=null;showHover(null,e);}});
+  window.addEventListener('pointerup',e=>{if(!pointers.has(e.pointerId))return;if(!multi&&mode==='explore'&&lastTouch)select(lastTouch.properties.id,true);pointers.delete(e.pointerId);if(!pointers.size){multi=false;lastTouch=null;showHover(null,e);}});
   window.addEventListener('pointercancel',e=>{pointers.delete(e.pointerId);if(!pointers.size){multi=false;lastTouch=null;}showHover(null,e);});
   map.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')showHover(null,e);});
-  map.addEventListener('click',e=>{if(e.pointerType&&e.pointerType!=='mouse')return;if(mode==='pan'||e.defaultPrevented)return;const f=featureAt(e);if(f)select(f.properties.id);});
+  map.addEventListener('click',e=>{if(e.pointerType&&e.pointerType!=='mouse')return;if(mode==='pan'||e.defaultPrevented)return;const f=featureAt(e);if(f)select(f.properties.id,true);});
   $('#explore').onclick=()=>setMode('explore');$('#pan').onclick=()=>setMode('pan');
   $('#zoom-in').onclick=()=>svg.transition().duration(reduced?0:300).call(zoom.scaleBy,1.7);
   $('#zoom-out').onclick=()=>svg.transition().duration(reduced?0:300).call(zoom.scaleBy,1/1.7);
