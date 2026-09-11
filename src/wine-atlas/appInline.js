@@ -37,10 +37,13 @@ const regionalWineMap={
 function name(f){const value=f.properties.id==='TUR'?'Türkiye':f.properties.tr||f.properties.name;return countryNames[value]||value;}
 function fold(s){return s.toLocaleLowerCase('tr').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i');}
 function updateClasses(){paths.classed('selected',d=>d.properties.id===selected).classed('hovered',d=>d.properties.id===hovered);micros.classed('selected',d=>d.properties.id===selected).classed('hovered',d=>d.properties.id===hovered);}
+function positionRegions(){
+ const k=transform?.k||1;d3.select('#wine-regions').selectAll('.wine-region').attr('transform',d=>{const p=projection(d[1]);return `translate(${p[0]},${p[1]}) scale(${1/k})`;});
+}
 function renderRegions(){
  const data=regionalWineMap[selected]||[];const group=d3.select('#wine-regions');group.selectAll('*').remove();
  if(!data.length)return;
- group.selectAll('g').data(data).join('g').attr('class','wine-region').attr('transform',d=>{const p=projection(d[1]);return `translate(${p[0]},${p[1]})`;}).on('click',(event,d)=>{event.stopPropagation();showRegion(d,event);}).each(function(d){const g=d3.select(this);g.append('circle').attr('r',3.8);g.append('circle').attr('r',1.35);g.append('text').attr('x',6).attr('y',3).text(d[0]);});
+ group.selectAll('g').data(data).join('g').attr('class','wine-region').on('click',(event,d)=>{event.stopPropagation();showRegion(d,event);}).each(function(d){const g=d3.select(this);g.append('circle').attr('r',3.8);g.append('circle').attr('r',1.35);g.append('text').attr('x',6).attr('y',3).text(d[0]);});positionRegions();
 }
 function showRegion(region,event){
  const card=$('#region-card');card.innerHTML=`<strong>${escapeHTML(region[0])}</strong><span>${region[2].map(escapeHTML).join(' · ')}</span>`;card.hidden=false;const stage=$('#stage').getBoundingClientRect(),w=card.offsetWidth;card.style.left=Math.max(8,Math.min(stage.width-w-8,event.clientX-stage.left+12))+'px';card.style.top=Math.max(8,Math.min(stage.height-64,event.clientY-stage.top-58))+'px';
@@ -137,7 +140,7 @@ async function init(){
    if(e.type==='dblclick')return false;
    if(e.type.startsWith('touch'))return mode==='pan'||e.touches.length>1;
    return mode==='pan'&&!e.button;
-  }).on('zoom',e=>{transform=e.transform;d3.select('#geography').attr('transform',transform);micros.attr('r',2.2/Math.sqrt(transform.k));mark();$('#hover').hidden=true;$('#region-card').hidden=true;});
+  }).on('zoom',e=>{transform=e.transform;d3.select('#geography').attr('transform',transform);micros.attr('r',2.2/Math.sqrt(transform.k));mark();positionRegions();$('#hover').hidden=true;$('#region-card').hidden=true;});
   svg.call(zoom).on('dblclick.zoom',null);
   const map=$('#map');
   map.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;pointers.add(e.pointerId);if(pointers.size>1)multi=true;if(mode==='explore'&&!multi){lastTouch=featureAt(e);showHover(lastTouch,e);}if(e.target.hasPointerCapture?.(e.pointerId))e.target.releasePointerCapture(e.pointerId);});
