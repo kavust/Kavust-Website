@@ -40,7 +40,7 @@ function updateClasses(){paths.classed('selected',d=>d.properties.id===selected)
 function renderRegions(){
  const data=regionalWineMap[selected]||[];const group=d3.select('#wine-regions');group.selectAll('*').remove();
  if(!data.length)return;
- group.selectAll('g').data(data).join('g').attr('class','wine-region').attr('transform',d=>{const p=projection(d[1]);return `translate(${p[0]},${p[1]})`;}).on('click',(event,d)=>{event.stopPropagation();showRegion(d,event);}).each(function(d){const g=d3.select(this);g.append('circle').attr('r',6);g.append('circle').attr('r',2.1);g.append('text').attr('x',9).attr('y',4).text(d[0]);});
+ group.selectAll('g').data(data).join('g').attr('class','wine-region').attr('transform',d=>{const p=projection(d[1]);return `translate(${p[0]},${p[1]})`;}).on('click',(event,d)=>{event.stopPropagation();showRegion(d,event);}).each(function(d){const g=d3.select(this);g.append('circle').attr('r',3.8);g.append('circle').attr('r',1.35);g.append('text').attr('x',6).attr('y',3).text(d[0]);});
 }
 function showRegion(region,event){
  const card=$('#region-card');card.innerHTML=`<strong>${escapeHTML(region[0])}</strong><span>${region[2].map(escapeHTML).join(' · ')}</span>`;card.hidden=false;const stage=$('#stage').getBoundingClientRect(),w=card.offsetWidth;card.style.left=Math.max(8,Math.min(stage.width-w-8,event.clientX-stage.left+12))+'px';card.style.top=Math.max(8,Math.min(stage.height-64,event.clientY-stage.top-58))+'px';
