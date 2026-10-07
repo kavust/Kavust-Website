@@ -1,9 +1,9 @@
 import { Calendar, MapPin, ArrowUpRight } from 'lucide-react';
 
 const eventImages = [
+  'https://lh3.googleusercontent.com/pw/AP1GczMwJkpEKBdWBC-NHWMgp-4X6zry2JbnnwcObFxumJCt1vqnGEjwm_HPiqY749AN5b1kJD2cksNQzqPToheMZxpBIfMu8iOn0visl08PlflmYt45xGVi=w900-h1350-no',
+  'https://lh3.googleusercontent.com/pw/AP1GczPkbrlSqNr2chXbAW6eDP5pItwPT_MTRWpihYDeZR4E46441nb_dWAGp1C1cV0_scuJSOmusSQv__OiwNIeDrCuywCaX8g6KtsKmYi7Xg6tz1aOacYN=w1200-h800-no',
   'https://lh3.googleusercontent.com/pw/AP1GczOM8Hsp-bmJkAitIez6dvf-V_4kIMU1lJ0kq7alZsxqtEVOMcxRVtnlfap8LrXkfVFf7XXEGCgbB5wdvp0gi3X6dR9WPISqg8NnsODvPjrU7gAn3hja=w1200-h800-no',
-  'https://lh3.googleusercontent.com/pw/AP1GczOF8LX_x87tt8GHyvB5_27_PzsW_75TsHSKW14puUVLs2kTKaI8eEmWkB8X0L1e2hz57vkmAclXt1O0-qcinclD-rtu0rNGtQCTmFlAha93Iv3iaw9v=w1200-h800-no',
-  'https://lh3.googleusercontent.com/pw/AP1GczOS51S3jw_bgtpo3BIXDOeGO-OdiH4vtdx155yOQflLC2ZelUEBjb0IpPLqmxree-L9zd2kT6s_4UslwVnJPSMxqcNTZT6-7ogh5rLEimmlz_1UlIxr=w1200-h800-no',
 ];
 
 export default function Events() {
