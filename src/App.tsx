@@ -31,7 +31,7 @@ function App() {
       window.history.pushState({}, '', nextPath);
       setPath(nextPath);
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'auto' });
   };
 
   useEffect(() => {
@@ -56,21 +56,24 @@ function App() {
     return () => observer.disconnect();
   }, [language]);
 
-  const isEventPage = path.includes('/events/backblaze-executive-event');
+  const normalizedPath = path.replace(/\/+$/, '') || '/';
+  const isEventDetailPage = normalizedPath === '/events/backblaze-executive-event';
+  const isEventsPage = normalizedPath === '/events';
 
   return (
     <div className="min-h-screen bg-black-deep text-white overflow-x-hidden">
       <Navigation language={language} onLanguageChange={setLanguage} onNavigate={navigateTo} />
       <main>
-        {isEventPage ? (
+        {isEventDetailPage ? (
           <BackblazeEvent onNavigate={navigateTo} />
+        ) : isEventsPage ? (
+          <Events />
         ) : (
           <>
             <Hero />
             <Services />
             <About />
             <Experience />
-            <Events />
             <WineAtlas language={language} />
             <Contact />
           </>

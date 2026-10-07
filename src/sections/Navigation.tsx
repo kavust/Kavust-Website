@@ -7,7 +7,7 @@ const navLinks = [
   { label: 'Hizmetler', href: '#services' },
   { label: 'Hakkımda', href: '#about' },
   { label: 'Deneyim', href: '#experience' },
-  { label: 'Events', href: '#events' },
+  { label: 'Events', href: '/events' },
   { label: 'İletişim', href: '#contact' },
 ];
 
@@ -26,7 +26,7 @@ export default function Navigation({ language, onLanguageChange, onNavigate }: N
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 100);
 
-      const sections = navLinks.map(link => link.href.replace('#', ''));
+      const sections = navLinks.filter(link => link.href.startsWith('#')).map(link => link.href.replace('#', ''));
       for (const section of sections.reverse()) {
         const element = document.getElementById(section);
         if (element) {
@@ -45,6 +45,12 @@ export default function Navigation({ language, onLanguageChange, onNavigate }: N
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
+    if (href.startsWith('/')) {
+      onNavigate(href);
+      setIsMobileMenuOpen(false);
+      return;
+    }
+
     if (window.location.pathname !== '/') {
       onNavigate('/');
       window.setTimeout(() => {
@@ -61,6 +67,22 @@ export default function Navigation({ language, onLanguageChange, onNavigate }: N
     }
   };
 
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (window.location.pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setIsMobileMenuOpen(false);
+      return;
+    }
+    onNavigate('/');
+    setIsMobileMenuOpen(false);
+  };
+
+  const isLinkActive = (href: string) => {
+    if (href.startsWith('/')) return window.location.pathname === href || window.location.pathname.startsWith(`${href}/`);
+    return window.location.pathname === '/' && activeSection === href.replace('#', '');
+  };
+
   return (
     <>
       <nav
@@ -75,7 +97,7 @@ export default function Navigation({ language, onLanguageChange, onNavigate }: N
             {/* Logo */}
             <a
               href="/"
-              onClick={(e) => handleNavClick(e, '#home')}
+              onClick={handleLogoClick}
               className="flex items-center gap-3"
             >
               <picture>
@@ -104,7 +126,7 @@ export default function Navigation({ language, onLanguageChange, onNavigate }: N
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link.href)}
                   className={`relative text-xs tracking-[0.2em] uppercase transition-colors duration-300 ${
-                    activeSection === link.href.replace('#', '')
+                    isLinkActive(link.href)
                       ? 'text-gold'
                       : 'text-gray-400 hover:text-white'
                   }`}
@@ -150,7 +172,7 @@ export default function Navigation({ language, onLanguageChange, onNavigate }: N
               href={link.href}
               onClick={(e) => handleNavClick(e, link.href)}
               className={`text-2xl font-serif tracking-wide transition-all duration-300 ${
-                activeSection === link.href.replace('#', '')
+                isLinkActive(link.href)
                   ? 'text-gold'
                   : 'text-white hover:text-gold'
               }`}

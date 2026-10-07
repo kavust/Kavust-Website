@@ -5,7 +5,7 @@ const navLinks = [
   { label: 'Hizmetler', href: '#services' },
   { label: 'Hakkımda', href: '#about' },
   { label: 'Deneyim', href: '#experience' },
-  { label: 'Events', href: '#events' },
+  { label: 'Events', href: '/events' },
   { label: 'İletişim', href: '#contact' },
 ];
 
@@ -50,6 +50,10 @@ export default function Footer({ onNavigate }: FooterProps) {
                 href={link.href}
                 onClick={(e) => {
                   e.preventDefault();
+                  if (link.href.startsWith('/')) {
+                    onNavigate(link.href);
+                    return;
+                  }
                   if (window.location.pathname !== '/') {
                     onNavigate('/');
                     window.setTimeout(() => {
