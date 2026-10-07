@@ -5,10 +5,15 @@ const navLinks = [
   { label: 'Hizmetler', href: '#services' },
   { label: 'Hakkımda', href: '#about' },
   { label: 'Deneyim', href: '#experience' },
+  { label: 'Events', href: '#events' },
   { label: 'İletişim', href: '#contact' },
 ];
 
-export default function Footer() {
+interface FooterProps {
+  onNavigate: (path: string) => void;
+}
+
+export default function Footer({ onNavigate }: FooterProps) {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -45,6 +50,13 @@ export default function Footer() {
                 href={link.href}
                 onClick={(e) => {
                   e.preventDefault();
+                  if (window.location.pathname !== '/') {
+                    onNavigate('/');
+                    window.setTimeout(() => {
+                      document.querySelector(link.href)?.scrollIntoView({ behavior: 'smooth' });
+                    }, 80);
+                    return;
+                  }
                   document.querySelector(link.href)?.scrollIntoView({ behavior: 'smooth' });
                 }}
                 className="text-gray-500 hover:text-gold transition-colors duration-300 text-xs tracking-[0.15em] uppercase"

@@ -186,3 +186,30 @@
   height: 1px;
   background: linear-gradient(90deg, transparent, #c9a227, transparent);
 }
+
+/* Event gallery reveal */
+.event-reveal {
+  opacity: 0;
+  transform: translateY(42px) scale(0.985);
+  filter: saturate(0.92);
+  transition:
+    opacity 900ms ease,
+    transform 900ms ease,
+    filter 900ms ease,
+    border-color 450ms ease;
+}
+
+.event-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: saturate(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event-reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}

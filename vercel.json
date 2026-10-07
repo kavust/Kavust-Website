@@ -1,4 +1,7 @@
 {
+  "rewrites": [
+    { "source": "/events/:path*", "destination": "/" }
+  ],
   "headers": [
     {
       "source": "/",

@@ -7,12 +7,17 @@ const navLinks = [
   { label: 'Hizmetler', href: '#services' },
   { label: 'Hakkımda', href: '#about' },
   { label: 'Deneyim', href: '#experience' },
+  { label: 'Events', href: '#events' },
   { label: 'İletişim', href: '#contact' },
 ];
 
-interface NavigationProps { language: Language; onLanguageChange: (language: Language) => void; }
+interface NavigationProps {
+  language: Language;
+  onLanguageChange: (language: Language) => void;
+  onNavigate: (path: string) => void;
+}
 
-export default function Navigation({ language, onLanguageChange }: NavigationProps) {
+export default function Navigation({ language, onLanguageChange, onNavigate }: NavigationProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
@@ -40,6 +45,15 @@ export default function Navigation({ language, onLanguageChange }: NavigationPro
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
+    if (window.location.pathname !== '/') {
+      onNavigate('/');
+      window.setTimeout(() => {
+        document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
+      }, 80);
+      setIsMobileMenuOpen(false);
+      return;
+    }
+
     const element = document.querySelector(href);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
@@ -60,7 +74,7 @@ export default function Navigation({ language, onLanguageChange }: NavigationPro
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <a
-              href="#home"
+              href="/"
               onClick={(e) => handleNavClick(e, '#home')}
               className="flex items-center gap-3"
             >
