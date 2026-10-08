@@ -33,10 +33,10 @@ export function mountWineAtlas(root) {
     ZAF: [['Stellenbosch', [18.86, -33.94], ['Cabernet Sauvignon', 'Chenin Blanc']], ['Swartland', [18.77, -33.4], ['Syrah', 'Chenin Blanc']], ['Constantia', [18.45, -34.03], ['Vin de Constance', 'Sauvignon Blanc']]]
   };
 
-  let countries = [], profiles = {}, byId = new Map(), selected = 'TUR', hovered = null;
+  let countries = [], land = null, wineFeatures = [], profiles = {}, byId = new Map(), selected = 'TUR', hovered = null;
   let canvas, ctx, projection, path, graticule, width = 1000, height = 550, dpr = 1;
   let rotation = [-31, -26, 0], zoomLevel = 1.08, targetRotation = null, targetZoom = null;
-  let dragging = false, start = null, moved = false, lastPoint = null, lastFrame = performance.now(), resumeAt = 0, animationId = 0;
+  let dragging = false, start = null, moved = false, stageVisible = true, lastFrame = performance.now(), lastDraw = 0, resumeAt = 0, animationId = 0;
 
   function name(f) {
     const value = f.properties.id === 'TUR' ? 'Türkiye' : f.properties.tr || f.properties.name;
@@ -117,7 +117,7 @@ export function mountWineAtlas(root) {
   }
   function resize() {
     const rect = $('#stage').getBoundingClientRect();
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = Math.min(window.devicePixelRatio || 1, width < 760 ? 1.35 : 1.75);
     width = Math.max(320, Math.round(rect.width));
     height = Math.max(300, Math.round(rect.height));
     canvas.width = Math.round(width * dpr);
@@ -169,15 +169,15 @@ export function mountWineAtlas(root) {
     ctx.beginPath(); path({ type: 'Sphere' }); ctx.fillStyle = ocean; ctx.fill();
     ctx.save(); ctx.clip();
     ctx.beginPath(); path(graticule); ctx.strokeStyle = 'rgba(174,205,216,0.12)'; ctx.lineWidth = 0.65; ctx.stroke();
-    countries.forEach((f) => {
-      const id = f.properties.id;
-      ctx.beginPath(); path(f);
-      ctx.fillStyle = id === selected ? '#d9b759' : id === hovered ? '#b79555' : profiles[id] ? '#6d6047' : '#24383a';
-      ctx.fill();
-      ctx.strokeStyle = id === selected ? 'rgba(255,234,179,0.78)' : 'rgba(184,201,196,0.25)';
-      ctx.lineWidth = id === selected ? 0.95 : 0.45;
-      ctx.stroke();
-    });
+    ctx.beginPath(); path(land);
+    ctx.fillStyle = '#263a3c';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(184,201,196,0.18)';
+    ctx.lineWidth = 0.42;
+    ctx.stroke();
+    drawWineDots();
+    drawFeature(hovered, '#b79555', 'rgba(255,235,184,0.45)', 0.75);
+    drawFeature(selected, '#d9b759', 'rgba(255,238,188,0.85)', 1.05);
     drawRegions();
     const shade = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
     shade.addColorStop(0, 'rgba(255,236,181,0.18)');
@@ -187,6 +187,30 @@ export function mountWineAtlas(root) {
     ctx.restore();
     ctx.beginPath(); path({ type: 'Sphere' }); ctx.strokeStyle = 'rgba(226,193,107,0.58)'; ctx.lineWidth = 1.2; ctx.stroke();
     ctx.beginPath(); ctx.arc(cx - r * 0.26, cy - r * 0.18, r * 0.98, -1.0, 0.18); ctx.strokeStyle = 'rgba(167,209,232,0.38)'; ctx.lineWidth = 2.1; ctx.stroke();
+  }
+  function drawFeature(id, fill, stroke, lineWidth) {
+    const f = byId.get(id);
+    if (!f || (f.properties.point && !visible(f.properties.point))) return;
+    ctx.beginPath(); path(f);
+    ctx.fillStyle = fill; ctx.fill();
+    ctx.strokeStyle = stroke; ctx.lineWidth = lineWidth; ctx.stroke();
+  }
+  function drawWineDots() {
+    ctx.save();
+    wineFeatures.forEach((f) => {
+      if (!visible(f.properties.point)) return;
+      const p = projection(f.properties.point);
+      if (!p) return;
+      const isSelected = f.properties.id === selected;
+      ctx.beginPath();
+      ctx.arc(p[0], p[1], isSelected ? 3.8 : 2.1, 0, Math.PI * 2);
+      ctx.fillStyle = isSelected ? '#fff0b9' : 'rgba(218,184,95,0.82)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(4,10,11,0.9)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    });
+    ctx.restore();
   }
   function drawRegions() {
     const regions = regionalWineMap[selected] || [];
@@ -206,6 +230,16 @@ export function mountWineAtlas(root) {
   function animate(now) {
     const dt = Math.min(34, now - lastFrame);
     lastFrame = now;
+    if (!stageVisible) {
+      animationId = requestAnimationFrame(animate);
+      return;
+    }
+    const minFrameGap = dragging ? 33 : 42;
+    if (now - lastDraw < minFrameGap) {
+      animationId = requestAnimationFrame(animate);
+      return;
+    }
+    lastDraw = now;
     if (targetRotation) {
       rotation[0] += (targetRotation[0] - rotation[0]) * 0.08;
       rotation[1] += (targetRotation[1] - rotation[1]) * 0.08;
@@ -283,8 +317,10 @@ export function mountWineAtlas(root) {
       const get = async (url) => { const r = await fetch(url); if (!r.ok) throw Error(url); return r.json(); };
       const [world, data] = await Promise.all([get(`${atlasBase}world.json`), get(`${atlasBase}profiles.json`)]);
       countries = world.features;
+      land = { type: 'FeatureCollection', features: countries };
       profiles = data;
       byId = new Map(countries.map((f) => [f.properties.id, f]));
+      wineFeatures = countries.filter((f) => profiles[f.properties.id]);
       for (const f of countries) {
         const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
         for (const coordinates of polys) if (d3lib.geoArea({ type: 'Polygon', coordinates }) > 2 * Math.PI) coordinates.forEach((r) => r.reverse());
@@ -294,6 +330,9 @@ export function mountWineAtlas(root) {
       projection = d3lib.geoOrthographic().precision(0.45).clipAngle(90);
       graticule = d3lib.geoGraticule10();
       new ResizeObserver(resize).observe($('#stage'));
+      new IntersectionObserver((entries) => {
+        stageVisible = entries[0]?.isIntersecting ?? true;
+      }, { threshold: 0.05 }).observe($('#stage'));
       $('#load-state').hidden = true;
       select('TUR');
       $('#explore').onclick = () => setMode('explore');
@@ -317,16 +356,15 @@ export function mountWineAtlas(root) {
       });
       document.addEventListener('pointerdown', (e) => { if (!e.target.closest('.search-wrap')) closeSearch(); });
       canvas.addEventListener('pointerdown', (e) => {
-        dragging = true; moved = false; start = { x: e.clientX, y: e.clientY, r: [...rotation] }; lastPoint = start; targetRotation = null; resumeAt = performance.now() + 2500;
+        dragging = true; moved = false; start = { x: e.clientX, y: e.clientY, r: [...rotation] }; targetRotation = null; resumeAt = performance.now() + 2500;
         canvas.setPointerCapture?.(e.pointerId);
       });
       canvas.addEventListener('pointermove', (e) => {
         if (dragging && start) {
           const dx = e.clientX - start.x, dy = e.clientY - start.y;
           if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
-          rotation[0] = start.r[0] + dx * 0.24;
-          rotation[1] = Math.max(-62, Math.min(62, start.r[1] - dy * 0.18));
-          lastPoint = { x: e.clientX, y: e.clientY };
+          rotation[0] = start.r[0] + dx * 0.2;
+          rotation[1] = Math.max(-62, Math.min(62, start.r[1] - dy * 0.16));
           $('#region-card').hidden = true;
           draw();
           return;
@@ -341,7 +379,7 @@ export function mountWineAtlas(root) {
         if (!moved && region) showRegion(region.data, region.point);
         else if (!moved && f) select(f.properties.id, true);
         resumeAt = performance.now() + 1600;
-        start = null; lastPoint = null;
+        start = null;
       });
       canvas.addEventListener('pointerleave', (e) => { if (!dragging) showHover(null, e); });
       canvas.addEventListener('wheel', (e) => {
