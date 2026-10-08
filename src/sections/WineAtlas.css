@@ -9,3 +9,19 @@
 .wine-atlas-inline{--bg:#0a0a0a;--panel:#111312;--line:#35382e;--gold:#c9a43c}.wine-atlas-inline{background:var(--bg)}.wine-atlas-inline main{padding-top:40px;padding-bottom:40px}.wine-atlas-inline #ocean stop:first-child{stop-color:#242b26}.wine-atlas-inline #ocean stop:last-child{stop-color:#0a0a0a}.wine-atlas-inline .map-toolbar{background:#101412}.wine-atlas-inline #load-state{background:#0a0a0ae8}.wine-atlas-inline .country-panel{background:#111512}.wine-atlas-inline .notes{padding-bottom:4px}
 
 .wine-atlas-inline .wine-region{cursor:pointer}.wine-atlas-inline .wine-region circle:first-child{fill:#c9a43c;stroke:#fff0bd;stroke-width:1.2}.wine-atlas-inline .wine-region circle:nth-child(2){fill:#10191c}.wine-atlas-inline .wine-region text{fill:#f4e6bd;font:700 15px 'DM Sans',sans-serif;paint-order:stroke;stroke:#10191c;stroke-width:4px;stroke-linejoin:round;pointer-events:none}.wine-atlas-inline .region-card{position:absolute;z-index:5;pointer-events:none;background:#ece3cf;color:#17201e;padding:9px 12px;border-radius:3px;box-shadow:0 5px 18px #0007;max-width:190px}.wine-atlas-inline .region-card strong{display:block;font-size:13px}.wine-atlas-inline .region-card span{display:block;margin-top:3px;font-size:11px;line-height:1.4;color:#53605a}@media(max-width:740px){.wine-atlas-inline .wine-region text{font-size:13px}}
+
+/* Premium globe preview */
+.wine-atlas-inline .globe-stage{min-height:520px;background:#020607}
+.wine-atlas-inline #globe{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y;user-select:none}
+.wine-atlas-inline #globe:active{cursor:grabbing}
+.wine-atlas-inline .globe-aurora{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 48%,rgba(218,184,95,.16),transparent 34%),radial-gradient(circle at 72% 18%,rgba(70,127,157,.18),transparent 28%),linear-gradient(180deg,transparent 0%,rgba(0,0,0,.1) 58%,rgba(0,0,0,.72) 100%);mix-blend-mode:screen;opacity:.78}
+.wine-atlas-inline .globe-stage:before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.78),transparent 24%,transparent 76%,rgba(0,0,0,.76)),linear-gradient(180deg,rgba(0,0,0,.28),transparent 40%,rgba(0,0,0,.52));z-index:1}
+.wine-atlas-inline .globe-stage .map-label,.wine-atlas-inline .globe-stage .zoom-tools,.wine-atlas-inline .globe-stage .position,.wine-atlas-inline .globe-stage .hover-card,.wine-atlas-inline .globe-stage .region-card,.wine-atlas-inline .globe-stage #load-state{z-index:2}
+.wine-atlas-inline .globe-stage #load-state{background:radial-gradient(circle at 50% 45%,rgba(32,47,48,.72),rgba(0,0,0,.9) 62%)}
+.wine-atlas-inline .globe-stage .map-label{top:22px;color:#d8c99a;text-shadow:0 0 22px rgba(218,184,95,.34)}
+.wine-atlas-inline .globe-stage .position{color:#b7c9c8;text-shadow:0 0 18px #000}
+.wine-atlas-inline .globe-stage .zoom-tools button{background:rgba(9,19,22,.72);border-color:rgba(214,183,106,.34);backdrop-filter:blur(10px)}
+.wine-atlas-inline .globe-stage .zoom-tools button:hover{background:rgba(35,50,50,.82);border-color:rgba(229,202,129,.75)}
+.wine-atlas-inline .atlas{box-shadow:0 30px 90px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,255,255,.03)}
+.wine-atlas-inline .map-toolbar{background:linear-gradient(180deg,#101412 0%,#09100f 100%)}
+@media(max-width:740px){.wine-atlas-inline .globe-stage{height:410px;min-height:410px}.wine-atlas-inline .globe-stage:before{background:linear-gradient(90deg,rgba(0,0,0,.62),transparent 22%,transparent 78%,rgba(0,0,0,.62)),linear-gradient(180deg,rgba(0,0,0,.18),transparent 42%,rgba(0,0,0,.64))}.wine-atlas-inline .globe-stage .map-label{top:10px}.wine-atlas-inline .globe-stage .zoom-tools{bottom:15px}.wine-atlas-inline .globe-stage .position{bottom:20px}}
