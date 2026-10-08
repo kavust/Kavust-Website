@@ -9,11 +9,7 @@ const navLinks = [
   { label: 'İletişim', href: '#contact' },
 ];
 
-interface FooterProps {
-  onNavigate: (path: string) => void;
-}
-
-export default function Footer({ onNavigate }: FooterProps) {
+export default function Footer() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -49,16 +45,10 @@ export default function Footer({ onNavigate }: FooterProps) {
                 key={index}
                 href={link.href}
                 onClick={(e) => {
+                  if (link.href.startsWith('/')) return;
                   e.preventDefault();
-                  if (link.href.startsWith('/')) {
-                    onNavigate(link.href);
-                    return;
-                  }
                   if (window.location.pathname !== '/') {
-                    onNavigate('/');
-                    window.setTimeout(() => {
-                      document.querySelector(link.href)?.scrollIntoView({ behavior: 'smooth' });
-                    }, 80);
+                    window.location.href = `/${link.href}`;
                     return;
                   }
                   document.querySelector(link.href)?.scrollIntoView({ behavior: 'smooth' });

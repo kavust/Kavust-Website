@@ -26,14 +26,6 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const navigateTo = (nextPath: string) => {
-    if (window.location.pathname !== nextPath) {
-      window.history.pushState({}, '', nextPath);
-      setPath(nextPath);
-    }
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  };
-
   useEffect(() => {
     document.documentElement.lang = language;
     localStorage.setItem('kavust-language', language);
@@ -62,10 +54,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-black-deep text-white overflow-x-hidden">
-      <Navigation language={language} onLanguageChange={setLanguage} onNavigate={navigateTo} />
+      <Navigation language={language} onLanguageChange={setLanguage} />
       <main>
         {isEventDetailPage ? (
-          <BackblazeEvent onNavigate={navigateTo} />
+          <BackblazeEvent />
         ) : isEventsPage ? (
           <Events />
         ) : (
@@ -79,7 +71,7 @@ function App() {
           </>
         )}
       </main>
-      <Footer onNavigate={navigateTo} />
+      <Footer />
     </div>
   );
 }

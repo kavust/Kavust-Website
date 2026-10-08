@@ -14,10 +14,9 @@ const navLinks = [
 interface NavigationProps {
   language: Language;
   onLanguageChange: (language: Language) => void;
-  onNavigate: (path: string) => void;
 }
 
-export default function Navigation({ language, onLanguageChange, onNavigate }: NavigationProps) {
+export default function Navigation({ language, onLanguageChange }: NavigationProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
@@ -45,18 +44,8 @@ export default function Navigation({ language, onLanguageChange, onNavigate }: N
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    if (href.startsWith('/')) {
-      onNavigate(href);
-      setIsMobileMenuOpen(false);
-      return;
-    }
-
     if (window.location.pathname !== '/') {
-      onNavigate('/');
-      window.setTimeout(() => {
-        document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
-      }, 80);
-      setIsMobileMenuOpen(false);
+      window.location.href = `/${href}`;
       return;
     }
 
@@ -65,17 +54,6 @@ export default function Navigation({ language, onLanguageChange, onNavigate }: N
       element.scrollIntoView({ behavior: 'smooth' });
       setIsMobileMenuOpen(false);
     }
-  };
-
-  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    if (window.location.pathname === '/') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      setIsMobileMenuOpen(false);
-      return;
-    }
-    onNavigate('/');
-    setIsMobileMenuOpen(false);
   };
 
   const isLinkActive = (href: string) => {
@@ -97,7 +75,6 @@ export default function Navigation({ language, onLanguageChange, onNavigate }: N
             {/* Logo */}
             <a
               href="/"
-              onClick={handleLogoClick}
               className="flex items-center gap-3"
             >
               <picture>
@@ -124,7 +101,7 @@ export default function Navigation({ language, onLanguageChange, onNavigate }: N
                 <a
                   key={index}
                   href={link.href}
-                  onClick={(e) => handleNavClick(e, link.href)}
+                  onClick={link.href.startsWith('#') ? (e) => handleNavClick(e, link.href) : undefined}
                   className={`relative text-xs tracking-[0.2em] uppercase transition-colors duration-300 ${
                     isLinkActive(link.href)
                       ? 'text-gold'
@@ -170,7 +147,7 @@ export default function Navigation({ language, onLanguageChange, onNavigate }: N
             <a
               key={index}
               href={link.href}
-              onClick={(e) => handleNavClick(e, link.href)}
+              onClick={link.href.startsWith('#') ? (e) => handleNavClick(e, link.href) : undefined}
               className={`text-2xl font-serif tracking-wide transition-all duration-300 ${
                 isLinkActive(link.href)
                   ? 'text-gold'

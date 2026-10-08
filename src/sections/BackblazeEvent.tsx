@@ -36,11 +36,7 @@ const notes = [
   },
 ];
 
-interface BackblazeEventProps {
-  onNavigate: (path: string) => void;
-}
-
-export default function BackblazeEvent({ onNavigate }: BackblazeEventProps) {
+export default function BackblazeEvent() {
   const [visible, setVisible] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
   const parallaxRef = useRef<HTMLImageElement>(null);
@@ -85,11 +81,6 @@ export default function BackblazeEvent({ onNavigate }: BackblazeEventProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const goHome = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
-    onNavigate('/');
-  };
-
   return (
     <article className="bg-black-deep text-white">
       <section ref={heroRef} className="relative min-h-screen overflow-hidden pt-20">
@@ -105,7 +96,6 @@ export default function BackblazeEvent({ onNavigate }: BackblazeEventProps) {
         <div className={`relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] max-w-7xl flex-col justify-end px-8 pb-20 transition-all duration-1000 lg:px-16 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
           <a
             href="/"
-            onClick={goHome}
             className="mb-12 inline-flex w-fit items-center gap-3 text-xs uppercase tracking-[0.22em] text-gold transition-colors hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />

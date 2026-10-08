@@ -7,13 +7,6 @@ const eventImages = [
 ];
 
 export default function Events() {
-  const openEvent = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
-    window.history.pushState({}, '', '/events/backblaze-executive-event');
-    window.dispatchEvent(new PopStateEvent('popstate'));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   return (
     <section id="events" className="relative overflow-hidden bg-black-deep py-28 sm:py-36">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
@@ -33,7 +26,6 @@ export default function Events() {
 
           <a
             href="/events/backblaze-executive-event"
-            onClick={openEvent}
             className="mt-10 inline-flex items-center gap-4 border border-gold/40 px-7 py-4 text-xs uppercase tracking-[0.24em] text-gold transition-all duration-300 hover:bg-gold hover:text-black-deep"
           >
             Eventi Gör
@@ -43,7 +35,6 @@ export default function Events() {
 
         <a
           href="/events/backblaze-executive-event"
-          onClick={openEvent}
           className="group relative block overflow-hidden border border-gold/20 bg-black-matte"
           aria-label="Backblaze executive private event sayfasını aç"
         >
