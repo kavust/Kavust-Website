@@ -12,7 +12,7 @@
 #kavust-silk-preview{background:#080909;color:#d3c299;overflow:hidden;font-family:Arial,sans-serif;position:relative}
 #kavust-silk-preview header{display:flex;align-items:center;gap:18px;padding:28px 30px;letter-spacing:3px;font-size:10px}
 #kavust-silk-preview .signature{font-family:Georgia,serif;font-size:34px;letter-spacing:0;color:#c5a562}
-#kavust-silk-preview .orb-stage{height:220px;position:relative;width:min(100%,380px);margin:0 auto}
+#kavust-silk-preview .orb-stage{height:270px;position:relative;width:min(100%,460px);margin:0 auto}
 #kavust-silk-preview canvas{width:100%;height:100%;display:block;touch-action:none;filter:brightness(2.2);cursor:grab}
 #kavust-silk-preview canvas:active{cursor:grabbing}
 #kavust-silk-preview footer{display:flex;justify-content:space-between;align-items:center;padding:22px 30px 30px;font-size:9px;letter-spacing:2px;color:#a99d85}
@@ -42,16 +42,16 @@ const THREE=await import('https://cdn.jsdelivr.net/npm/three@0.170.0/build/three
 const canvas=root.querySelector('canvas'),stage=root.querySelector('.orb-stage');
 const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:false,powerPreference:'low-power'});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
-const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(36,1,.1,30);camera.position.z=6.3;
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(36,1,.1,30);camera.position.z=5.5;
 const group=new THREE.Group();scene.add(group);
 const vertex=`uniform float time;uniform float layer;uniform float pixelRatio;uniform vec2 grab;uniform vec2 pull;attribute float seed;varying float brightness;
 void main(){vec3 n=normalize(position);float theta=atan(n.z,n.x);float phi=acos(clamp(n.y,-1.,1.));
-float speed=layer<.5?1.7:(layer<1.5?-3.35:2.45);
-float verticalSpeed=layer<.5?.43:(layer<1.5?-.91:1.23);
-float verticalAmplitude=layer<.5?.035:(layer<1.5?.14:.085);
+float speed=layer<.5?2.25:(layer<1.5?-6.2:3.7);
+float verticalSpeed=layer<.5?.68:(layer<1.5?-1.65:2.05);
+float verticalAmplitude=layer<.5?.055:(layer<1.5?.22:.105);
 float flow=time*speed;
-float wave=sin(theta*3.+phi*4.+flow*.34+layer*2.1)*.035+sin(theta*5.-phi*3.-flow*.23+layer)*.022;
-float fold=pow(.5+.5*sin(phi*6.+theta*2.+flow*.24+layer*1.9),5.);
+float wave=sin(theta*3.+phi*4.+flow*.43+layer*2.1)*.035+sin(theta*5.-phi*3.-flow*.31+layer)*.022;
+float fold=pow(.5+.5*sin(phi*6.+theta*2.+flow*.36+layer*1.9),5.);
 // Tangential drift moves the inner fabric without shifting the sphere's centre.
 float drift=sin(flow*.47+layer*2.3)*.18;
 float ripple=sin(phi*2.5+time*verticalSpeed+layer*1.7)*.055;
@@ -90,7 +90,7 @@ const button=root.querySelector('#pause');const updateButton=()=>{button.textCon
 function frame(now){requestAnimationFrame(frame);if(now-last<33)return;const dt=Math.min((now-last)/1000,.06);last=now;if(!visible||document.hidden)return;if(!paused)time+=dt;
  // A damped spring only deforms the grabbed layer; the scene's centre stays fixed.
  if(drag.layer){const stiffness=drag.id===null?65:180;drag.velocity.x+=((drag.target.x-drag.value.x)*stiffness-drag.velocity.x*19)*dt;drag.velocity.y+=((drag.target.y-drag.value.y)*stiffness-drag.velocity.y*19)*dt;drag.value.addScaledVector(drag.velocity,dt);drag.layer.material.uniforms.pull.value.copy(drag.value);}
- layers.forEach((mesh,i)=>{mesh.material.uniforms.time.value=time*motionFactor;mesh.rotation.y=i*.92+time*(.035+i*.007);mesh.rotation.z=i*.38+Math.sin(time*.14+i)*.13;});renderer.render(scene,camera);
+ layers.forEach((mesh,i)=>{mesh.material.uniforms.time.value=time*motionFactor;const rates=[[.045,.065,-.025],[1.35,-1.8,1.55],[-.07,.16,.035]][i];mesh.rotation.set(i*.64+time*rates[0],i*.92+time*rates[1],i*.38+time*rates[2]);});renderer.render(scene,camera);
 }requestAnimationFrame(frame);
 }catch(error){
  const old=root.querySelector('canvas'),canvas=old.cloneNode();old.replaceWith(canvas);
@@ -107,10 +107,10 @@ function frame(now){requestAnimationFrame(frame);if(now-last<33)return;const dt=
  const release=e=>{if(e.pointerId!==touch.id)return;touch.id=null;touch.tx=touch.ty=0;if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);};
  canvas.addEventListener('pointerup',release);canvas.addEventListener('pointercancel',release);canvas.addEventListener('lostpointercapture',release);window.addEventListener('blur',()=>{touch.id=null;touch.tx=touch.ty=0;});
  const points=[];for(let l=0;l<3;l++)for(let r=1;r<78;r++)for(let c=0;c<140;c++)points.push([r/78*Math.PI,c/140*Math.PI*2,l]);
- function frame(now){requestAnimationFrame(frame);if(now-last<33)return;const dt=Math.min((now-last)/1000,.04);last=now;if(!visible||document.hidden)return;if(!paused)t+=dt;ctx.clearRect(0,0,w,h);ctx.globalCompositeOperation='lighter';const size=Math.min(w*.22,h*.23);
+ function frame(now){requestAnimationFrame(frame);if(now-last<33)return;const dt=Math.min((now-last)/1000,.04);last=now;if(!visible||document.hidden)return;if(!paused)t+=dt;ctx.clearRect(0,0,w,h);ctx.globalCompositeOperation='lighter';const size=Math.min(w*.27,h*.29);
  const stiffness=touch.id===null?65:180;touch.vx+=((touch.tx-touch.x)*stiffness-touch.vx*19)*dt;touch.vy+=((touch.ty-touch.y)*stiffness-touch.vy*19)*dt;touch.x+=touch.vx*dt;touch.y+=touch.vy*dt;hitPoints=[];
- for(const [baseP,q,l] of points){const flow=t*motionFactor*[1.7,-3.35,2.45][l],verticalSpeed=[.43,-.91,1.23][l];const p=baseP+Math.sin(t*verticalSpeed+q*2+l)*[.035,.14,.085][l]*Math.sin(baseP);const drift=(Math.sin(flow*.47+l*2.3)*.18+Math.sin(baseP*2.5+t*verticalSpeed+l*1.7)*.055)*Math.sin(baseP);const a=q+t*(.045+l*.01)+drift,fold=Math.pow(.5+.5*Math.sin(baseP*6+q*2+flow*.24+l*1.9),5),rad=1+Math.sin(q*3+baseP*4+flow*.34+l*2.1)*.035+Math.sin(q*5-baseP*3-flow*.23+l)*.022+fold*.075-l*.014;
- let x=Math.sin(p)*Math.cos(a)*rad,y=Math.cos(p)*rad,z=Math.sin(p)*Math.sin(a)*rad;const tilt=l*.65+.3;const yy=y*Math.cos(tilt)-z*Math.sin(tilt);z=y*Math.sin(tilt)+z*Math.cos(tilt);y=yy;const angle=l*.65+Math.sin(t*.14+l)*.13;const xx=x*Math.cos(angle)-y*Math.sin(angle);y=x*Math.sin(angle)+y*Math.cos(angle);x=xx;const perspective=3.8/(3.8-z);let sx=w/2+x*size*perspective,sy=h/2+y*size*perspective;
+ for(const [baseP,q,l] of points){const flow=t*motionFactor*[2.25,-6.2,3.7][l],verticalSpeed=[.68,-1.65,2.05][l];const p=baseP+Math.sin(t*verticalSpeed+q*2+l)*[.055,.22,.105][l]*Math.sin(baseP);const drift=(Math.sin(flow*.47+l*2.3)*.18+Math.sin(baseP*2.5+t*verticalSpeed+l*1.7)*.055)*Math.sin(baseP);const a=q+t*(.045+l*.01)+drift,fold=Math.pow(.5+.5*Math.sin(baseP*6+q*2+flow*.36+l*1.9),5),rad=1+Math.sin(q*3+baseP*4+flow*.43+l*2.1)*.035+Math.sin(q*5-baseP*3-flow*.31+l)*.022+fold*.075-l*.014;
+ let x=Math.sin(p)*Math.cos(a)*rad,y=Math.cos(p)*rad,z=Math.sin(p)*Math.sin(a)*rad;const tilt=l*.65+.3;const yy=y*Math.cos(tilt)-z*Math.sin(tilt);z=y*Math.sin(tilt)+z*Math.cos(tilt);y=yy;const angle=l*.65+Math.sin(t*[.14,.72,.11][l]+l)*[.13,.32,.1][l]+t*[.065,-1.8,.16][l];const xx=x*Math.cos(angle)-y*Math.sin(angle);y=x*Math.sin(angle)+y*Math.cos(angle);x=xx;const perspective=3.8/(3.8-z);let sx=w/2+x*size*perspective,sy=h/2+y*size*perspective;
  if(l===touch.layer){const weight=Math.exp(-((sx-touch.ax)**2+(sy-touch.ay)**2)/(size*size*.42));sx+=touch.x*weight;sy+=touch.y*weight;}hitPoints.push([sx,sy,l]);ctx.fillStyle='rgba(218,194,147,'+((.035+fold*.29)*(.6+.4*(z+1)/2))+')';ctx.fillRect(sx,sy,.7*perspective,.7*perspective);}}
  requestAnimationFrame(frame);
 }
