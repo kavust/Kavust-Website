@@ -1,18 +1,37 @@
+const revision = 'native-scroll-hd-20261028';
+
 export function mountSensory(root, en) {
-  const frame = document.createElement('iframe');
-  frame.src = `${import.meta.env.BASE_URL}silk-atlas.html?v=scroll-routing-20261028`;
-  frame.title = en ? 'Interactive wine layers' : 'Şarabın interaktif katmanları';
-  frame.style.cssText = 'display:block;width:100%;height:440px;border:0;margin-top:16px;';
-  frame.scrolling = 'no';
-  frame.loading = 'lazy';
-  let state = { type: 'wine-sensory', en, name: '', grapes: [] };
-  const send = () => frame.contentWindow?.postMessage(state, location.origin);
-  window.addEventListener('message', event => {
-    if (event.origin !== location.origin || event.source !== frame.contentWindow || event.data?.type !== 'sensory-height') return;
-    const height = Number(event.data.height);
-    if (Number.isFinite(height) && height > 0 && Math.abs(frame.offsetHeight - height) > 1) frame.style.height = `${Math.ceil(height)}px`;
+  const host = document.createElement('div');
+  host.style.cssText = 'display:block;width:100%;margin-top:16px;';
+  const shadow = host.attachShadow({ mode: 'open' });
+  root.querySelector('.country-panel').append(host);
+  let state = { en, name: '', grapes: [] };
+  let content;
+  const send = () => content?.dispatchEvent(new CustomEvent('wine-sensory', { detail: state }));
+
+  // Preserve the design without an iframe or a separate scrollable document.
+  Promise.all([
+    fetch(`${import.meta.env.BASE_URL}silk-atlas.html?v=${revision}`).then(response => {
+      if (!response.ok) throw new Error('Silk template unavailable');
+      return response.text();
+    }),
+    import(/* @vite-ignore */ `${import.meta.env.BASE_URL}silk-runtime.js?v=${revision}`),
+  ]).then(([html, { initSilk }]) => {
+    if (!host.isConnected) return;
+    const template = new DOMParser().parseFromString(html, 'text/html');
+    template.querySelectorAll('style').forEach(style => shadow.append(style.cloneNode(true)));
+    content = template.getElementById('kavust-silk-preview');
+    shadow.append(content);
+    initSilk(content).catch(() => {
+      content.querySelector('.orb-error').hidden = false;
+    });
+    send();
+  }).catch(() => {
+    const retry = document.createElement('button');
+    retry.textContent = en ? 'Reload animation' : 'Animasyonu yeniden yükle';
+    retry.onclick = () => location.reload();
+    shadow.append(retry);
   });
-  frame.addEventListener('load', send);
-  root.querySelector('.country-panel').append(frame);
-  return (name, grapes = []) => { state = { type: 'wine-sensory', en, name, grapes }; send(); };
+
+  return (name, grapes = []) => { state = { en, name, grapes }; send(); };
 }
