@@ -69,24 +69,24 @@ const fragment=`uniform vec3 tint;varying float brightness;void main(){float d=l
 const layers=[];
 const membraneVertex=vertex
  .replace('varying float brightness;', 'varying float brightness;varying vec3 viewPosition;')
- .replace('vec3 p=silk*(1.+wave+fold*.055-layer*.014);', 'vec3 p=silk*(.87+wave+sin(theta*2.+phi*3.+flow*.43+layer*1.7)*.13+fold*.055-layer*.014);')
+ .replace('vec3 p=silk*(1.+wave+fold*.055-layer*.014);', 'float curl=sin(theta*2.+phi*3.+flow*.43+layer*1.7+sin(phi*2.-flow*.31)*.7);vec3 p=silk*(.89+wave*.65+curl*.095+sin(theta*4.-phi*2.-flow*.27+layer)*.025+fold*.045-layer*.009);')
  .replace('gl_Position=projectionMatrix*mv;', 'viewPosition=mv.xyz;gl_Position=projectionMatrix*mv;');
 const membraneFragment=`uniform vec3 tint;varying vec3 viewPosition;varying float brightness;
 void main(){
  vec3 normal=normalize(cross(dFdx(viewPosition),dFdy(viewPosition)));
  float rim=pow(1.-abs(dot(normal,normalize(-viewPosition))),2.8);
- float alpha=.008+rim*.16;
+ float alpha=.003+rim*.13;
  gl_FragColor=vec4(tint,alpha);
 }`;
 for(let l=0;l<3;l++){
  const rows=140,cols=240,positions=new Float32Array(rows*cols*3),seeds=new Float32Array(rows*cols);
  let k=0;
- for(let r=0;r<rows;r++){const phi=(r+.5)/rows*Math.PI;for(let c=0;c<cols;c++){const theta=c/cols*Math.PI*2;positions[k*3]=Math.sin(phi)*Math.cos(theta);positions[k*3+1]=Math.cos(phi);positions[k*3+2]=Math.sin(phi)*Math.sin(theta);seeds[k]=k;k++;}}
+ for(let r=0;r<rows;r++){const phi=Math.acos(1.-2.*(r+.5)/rows);for(let c=0;c<cols;c++){const theta=(c+.35*Math.sin(k*12.9898))/cols*Math.PI*2;positions[k*3]=Math.sin(phi)*Math.cos(theta);positions[k*3+1]=Math.cos(phi);positions[k*3+2]=Math.sin(phi)*Math.sin(theta);seeds[k]=k;k++;}}
  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));geometry.setAttribute('seed',new THREE.BufferAttribute(seeds,1));
  const uniforms={time:{value:0},layer:{value:l},grab:{value:new THREE.Vector2()},pull:{value:new THREE.Vector2()},pixelRatio:{value:renderer.getPixelRatio()},tint:{value:new THREE.Color(['#829deb','#adbaff','#6d8cd5'][l])}};
  const material=new THREE.ShaderMaterial({uniforms,vertexShader:membraneVertex,fragmentShader:membraneFragment,transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending});
  const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,128,96),material);
- const dustMaterial=new THREE.ShaderMaterial({uniforms,vertexShader:membraneVertex,fragmentShader:fragment.replace('a*brightness','a*brightness*.22'),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
+ const dustMaterial=new THREE.ShaderMaterial({uniforms,vertexShader:membraneVertex,fragmentShader:fragment.replace('a*brightness','a*brightness*.12'),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
  mesh.add(new THREE.Points(geometry,dustMaterial));
  mesh.rotation.set(l*.64,l*.92,l*.38);group.add(mesh);layers.push(mesh);
 }
@@ -129,7 +129,7 @@ function frame(now){requestAnimationFrame(frame);if(now-last<33)return;const dt=
  const stiffness=touch.id===null?65:180;touch.vx+=((touch.tx-touch.x)*stiffness-touch.vx*19)*dt;touch.vy+=((touch.ty-touch.y)*stiffness-touch.vy*19)*dt;touch.x+=touch.vx*dt;touch.y+=touch.vy*dt;hitPoints=[];
  for(const [baseP,q,l] of points){const speeds=[1.25,-2.3,1.75],verticalSpeeds=[.38,-.78,1.08],flow=t*motionFactor*speeds[l],verticalSpeed=verticalSpeeds[l];const p=baseP+Math.sin(t*verticalSpeed+q*2+l)*[.035,.115,.06][l]*Math.sin(baseP);const drift=(Math.sin(flow*.47+l*2.3)*.18+Math.sin(baseP*2.5+t*verticalSpeed+l*1.7)*.055)*Math.sin(baseP);const a=q+t*(.045+l*.01)+drift,fold=Math.pow(.5+.5*Math.sin(baseP*6+q*2+flow*.36+l*1.9),3.5),rad=1+Math.sin(q*3+baseP*4+flow*.43+l*2.1)*.035+Math.sin(q*5-baseP*3-flow*.31+l)*.022+fold*.055-l*.014;
  let x=Math.sin(p)*Math.cos(a)*rad,y=Math.cos(p)*rad,z=Math.sin(p)*Math.sin(a)*rad;const tilt=l*.65+.3;const yy=y*Math.cos(tilt)-z*Math.sin(tilt);z=y*Math.sin(tilt)+z*Math.cos(tilt);y=yy;const angle=l*.65+Math.sin(t*[.09,.17,.12][l]+l)*.025+t*[.02,-.03,.018][l];const xx=x*Math.cos(angle)-y*Math.sin(angle);y=x*Math.sin(angle)+y*Math.cos(angle);x=xx;const perspective=3.8/(3.8-z);let sx=w/2+x*size*perspective,sy=h/2+y*size*perspective;
- if(l===touch.layer){const weight=Math.exp(-((sx-touch.ax)**2+(sy-touch.ay)**2)/(size*size*.42));sx+=touch.x*weight;sy+=touch.y*weight;}hitPoints.push([sx,sy,l]);ctx.fillStyle='rgba(218,194,147,'+((.035+fold*.29)*(.6+.4*(z+1)/2))+')';ctx.fillRect(sx,sy,.7*perspective,.7*perspective);}}
+ if(l===touch.layer){const weight=Math.exp(-((sx-touch.ax)**2+(sy-touch.ay)**2)/(size*size*.42));sx+=touch.x*weight;sy+=touch.y*weight;}hitPoints.push([sx,sy,l]);if(q===0){ctx.beginPath();ctx.moveTo(sx,sy);}else ctx.lineTo(sx,sy);if(q>6.23){ctx.strokeStyle='rgba(143,169,245,.025)';ctx.lineWidth=.55;ctx.stroke();}ctx.fillStyle='rgba(143,169,245,'+((.012+fold*.13)*(.6+.4*(z+1)/2))+')';ctx.fillRect(sx,sy,.55*perspective,.55*perspective);}}
  requestAnimationFrame(frame);
 }
 </script>
