@@ -1,27 +1,29 @@
 <!doctype html>
 <html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Silk · Dokunma Önizlemesi</title><style>body{margin:0;background:#080909}</style></head><body>
 <div id="kavust-silk-preview">
-  <header><span id="region-name">Şarabın katmanları</span></header>
+  <header><span id="region-name">Şarabın katmanları</span><button id="pause" type="button" aria-label="Animasyonu duraklat">Ⅱ</button></header>
   <div class="orb-stage"><canvas aria-label="Yavaşça dalgalanan, üç saydam katmandan oluşan interaktif küre"></canvas><div class="orb-error" hidden>Animasyon yüklenemedi. Lütfen önizlemeyi yeniden açın.</div></div>
   <div id="sensory-grapes"></div>
   <nav id="layers" aria-label="Katmanlar"><button data-layer="0" aria-pressed="true">Aroma</button><button data-layer="1" aria-pressed="false">Doku</button><button data-layer="2" aria-pressed="false">Bitiş</button></nav>
   <p id="layer-description" aria-live="polite"></p>
-  <footer><span id="sensory-disclaimer">Temsili stil · Üretici ve rekolteye göre değişir.</span><button id="pause" type="button" aria-label="Animasyonu duraklat">Ⅱ</button></footer>
+  <footer><span id="sensory-disclaimer">Temsili stil · Üretici ve rekolteye göre değişir.</span></footer>
 </div>
 <style>
 #kavust-silk-preview{background:#080909;color:#d3c299;overflow:hidden;font-family:Arial,sans-serif;position:relative}
 #kavust-silk-preview header{display:flex;align-items:center;gap:18px;padding:28px 30px;letter-spacing:3px;font-size:10px}
 #kavust-silk-preview .signature{font-family:Georgia,serif;font-size:34px;letter-spacing:0;color:#c5a562}
-#kavust-silk-preview .orb-stage{height:240px;position:relative;max-width:760px;margin:auto}
+#kavust-silk-preview .orb-stage{height:220px;position:relative;width:min(100%,380px);margin:0 auto}
 #kavust-silk-preview canvas{width:100%;height:100%;display:block;touch-action:none;filter:brightness(2.2);cursor:grab}
 #kavust-silk-preview canvas:active{cursor:grabbing}
 #kavust-silk-preview footer{display:flex;justify-content:space-between;align-items:center;padding:22px 30px 30px;font-size:9px;letter-spacing:2px;color:#a99d85}
 #kavust-silk-preview button{border:1px solid #4b463a;background:transparent;color:#d3c299;width:44px;height:44px;border-radius:50%;font-size:17px}
 #kavust-silk-preview .orb-error{position:absolute;inset:45% 20px auto;text-align:center;color:#d3c299}
-#kavust-silk-preview header{padding:16px 22px;letter-spacing:0;font-size:20px;font-family:Georgia,serif}
+#kavust-silk-preview header{justify-content:space-between;padding:12px 20px 4px;letter-spacing:1px;font-size:13px;font-family:Arial,sans-serif;color:#c9b77f;text-transform:uppercase}
 #sensory-grapes,#layer-description{padding:0 22px;font-size:13px;line-height:1.5;margin:12px 0}
 #layers{display:flex;gap:8px;padding:0 22px}#layers button{width:auto;border-radius:4px;padding:0 12px;font-size:13px}#layers button[aria-pressed=true]{background:#3b311c;color:#f2dfb3}
-#kavust-silk-preview footer{padding:12px 22px;font-size:10px;letter-spacing:0;gap:12px}#pause{flex-shrink:0}
+#kavust-silk-preview footer{padding:10px 20px 14px;font-size:10px;letter-spacing:0;gap:12px;color:#8e8b80}
+#kavust-silk-preview #pause{width:32px;height:32px;border-radius:50%;font-size:13px;flex-shrink:0}
+#kavust-silk-preview canvas{filter:brightness(1.45)}
 </style>
 <script type="module">
 const root=document.getElementById('kavust-silk-preview');
@@ -40,7 +42,7 @@ const THREE=await import('https://cdn.jsdelivr.net/npm/three@0.170.0/build/three
 const canvas=root.querySelector('canvas'),stage=root.querySelector('.orb-stage');
 const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:false,powerPreference:'low-power'});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
-const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(36,1,.1,30);camera.position.z=7.8;
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(36,1,.1,30);camera.position.z=6.3;
 const group=new THREE.Group();scene.add(group);
 const vertex=`uniform float time;uniform float layer;uniform float pixelRatio;uniform vec2 grab;uniform vec2 pull;attribute float seed;varying float brightness;
 void main(){vec3 n=normalize(position);float theta=atan(n.z,n.x);float phi=acos(clamp(n.y,-1.,1.));
