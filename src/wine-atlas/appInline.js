@@ -1,3 +1,4 @@
+import { mountSensory } from './sensory.js';
 export function mountWineAtlas(root){
 const $=s=>root.querySelector(s);
 const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -8,6 +9,7 @@ const pointers=new Set();let multi=false,lastTouch=null;
 const atlasBase=`${import.meta.env.BASE_URL}wine-atlas/`;
 const lang=root.dataset.lang==='en'?'en':'tr';
 const en=lang==='en';
+const updateSensory=mountSensory(root,en);
 const copy=en?{
   'Öne çıkan üzümler':'Signature grapes','Şarap bölgeleri':'Wine regions','Şarapları tanı':'Discover the wines',
   'Üzümler & şaraplar':'Grapes & wines','Ülke bilgisi':'Country information',
@@ -46,6 +48,7 @@ function renderRegions(){
  group.selectAll('g').data(data).join('g').attr('class','wine-region').on('click',(event,d)=>{event.stopPropagation();showRegion(d,event);}).each(function(d){const g=d3.select(this);g.append('circle').attr('r',3.8);g.append('circle').attr('r',1.35);g.append('text').attr('x',6).attr('y',3).text(d[0]);});positionRegions();
 }
 function showRegion(region,event){
+ updateSensory(region[0],region[2]);
  const card=$('#region-card');card.innerHTML=`<strong>${escapeHTML(region[0])}</strong><span>${region[2].map(escapeHTML).join(' · ')}</span>`;card.hidden=false;const stage=$('#stage').getBoundingClientRect(),w=card.offsetWidth;card.style.left=Math.max(8,Math.min(stage.width-w-8,event.clientX-stage.left+12))+'px';card.style.top=Math.max(8,Math.min(stage.height-64,event.clientY-stage.top-58))+'px';
 }
 function mark(){
@@ -54,12 +57,14 @@ function mark(){
  g.append('circle').attr('r',9).attr('class','selection-ring');g.append('circle').attr('r',3.5).attr('class','selection-dot');
 }
 function renderProfile(f){
+ updateSensory(name(f),(profiles[f.properties.id]?.grapes||[]).map(g=>g.name));
  const p=profiles[f.properties.id],code=f.properties.iso;
  const top=`<div class="profile-top"><span>${escapeHTML(en?f.properties.continent:(continents[f.properties.continent]||f.properties.continent))}</span><span class="country-code">${escapeHTML(code==='-99'?f.properties.id:code)}</span></div><h2>${escapeHTML(name(f))}</h2>`;
  let body;
  if(p){body=`<p class="profile-summary">${escapeHTML(p.summary)}</p><section class="profile-section"><h3 class="section-label">${t('Öne çıkan üzümler')}</h3><div class="grapes">${p.grapes.map(g=>`<span class="grape ${g.color==='r'?'red':''}"><i aria-hidden="true"></i>${escapeHTML(g.name)}</span>`).join('')}</div></section><section class="profile-section"><h3 class="section-label">${t('Şarap bölgeleri')}</h3><div class="region-list">${p.regions.map(r=>`<span>${escapeHTML(r)}</span>`).join('')}</div></section><section class="profile-section"><h3 class="section-label">${t('Şarapları tanı')}</h3>${p.wines.map(w=>`<article class="wine-card"><strong>${escapeHTML(w.name)}</strong><p>${escapeHTML(w.note)}</p></article>`).join('')}</section><a class="source-link" href="${escapeHTML(p.source)}" target="_blank" rel="noreferrer">${t('Kaynak ve ayrıntılı okuma ↗')}</a>`;
  }else{body=`<div class="empty-profile">${t('Bu ülke veya bölge için henüz doğrulanmış bir şarap profili eklenmedi. Bu, burada şarap üretilmediği anlamına gelmez.')}</div><section class="profile-section"><h3 class="section-label">${t('Keşfe devam et')}</h3><p class="profile-summary">${t('Altın tonundaki ülkelerde üzüm çeşitlerini, bölgeleri ve şarap stillerini inceleyebilirsin.')}</p><button class="nearby" id="back-turkey">${t('Türkiye profilini aç')}</button></section>`;}
  $('#profile').innerHTML=top+body;
+ $('#profile').querySelectorAll('.region-list span').forEach(label=>{const region=(regionalWineMap[selected]||[]).find(r=>r[0]===label.textContent);if(!region)return;const button=document.createElement('button');button.type='button';button.textContent=region[0];button.style.cssText='font:inherit;color:inherit;text-align:left;background:transparent;border:1px solid #6a582c;padding:8px 12px;border-radius:4px';button.onclick=()=>updateSensory(region[0],region[2]);label.replaceWith(button);});
  $('#profile').classList.remove('profile-enter');void $('#profile').offsetWidth;$('#profile').classList.add('profile-enter');
  $('.country-panel').scrollTop=0;
  if($('#back-turkey'))$('#back-turkey').onclick=()=>select('TUR',true);
