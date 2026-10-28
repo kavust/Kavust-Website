@@ -4,6 +4,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 const runtime = readFileSync(new URL('../public/silk-runtime.js', import.meta.url), 'utf8');
+test('pinch stays local instead of translating the whole membrane', () => {
+  const width = Number(runtime.match(/float influence=exp\(-dot\(offset,offset\)\/([.\d]+)\)/)[1]);
+  assert.equal(Math.exp(0), 1);
+  assert.ok(Math.exp(-.5 * .5 / width) < .001);
+  assert.match(runtime, /pull\*cos\(phase\)\+inertia\*sin\(phase\)/);
+  assert.match(runtime, /mv.z\+=loosen\*ring/);
+});
 const spring = runInNewContext(`(${runtime.slice(runtime.indexOf('function springStep'), runtime.indexOf('\ntry {'))})`);
 for (const fps of [30, 60, 120]) {
   test(`released layer overshoots and settles over six seconds at ${fps} FPS`, () => {

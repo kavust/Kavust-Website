@@ -24,7 +24,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(36,1,.02,30);camera.position.z=5.5;cameraTarget=new THREE.Vector3(0,0,5.5);
 showLayer(activeLayer);
 const group=new THREE.Group();scene.add(group);
-const vertex=`uniform float time;uniform float layer;uniform float pixelRatio;uniform float focus;uniform vec2 grab;uniform vec2 pull;uniform vec4 drops[4];attribute float seed;varying float brightness;
+const vertex=`uniform float time;uniform float layer;uniform float pixelRatio;uniform float focus;uniform vec2 grab;uniform vec2 pull;uniform vec2 pullVelocity;uniform float loosen;uniform vec4 drops[4];attribute float seed;varying float brightness;
 void main(){vec3 n=normalize(position);float theta=atan(n.z,n.x);float phi=acos(clamp(n.y,-1.,1.));
 float speed=layer<.5?1.25:(layer<1.5?-2.3:1.75);
 float verticalSpeed=layer<.5?.38:(layer<1.5?-.78:1.08);
@@ -41,9 +41,19 @@ vec3 silk=vec3(sin(silkPhi)*cos(silkTheta),cos(silkPhi),sin(silkPhi)*sin(silkThe
 vec3 p=silk*(1.+wave+fold*.055-layer*.014);p.x+=sin(phi*3.+flow*.19+layer)*.02;
 vec4 mv=modelViewMatrix*vec4(p,1.);
 vec2 offset=mv.xy-grab;
-float influence=exp(-dot(offset,offset)/(.5+length(pull)*.36));
-mv.xy+=pull*influence;
-mv.z+=sin(length(offset)*4.)*length(pull)*influence*.12;
+// A narrow pinch stays local; phase-shifted waves fold the surrounding fabric.
+float distFromGrab=length(offset);
+float influence=exp(-dot(offset,offset)/.035);
+float halo=exp(-dot(offset,offset)/.19);
+vec2 direction=offset/max(distFromGrab,.001);
+vec2 tangent=vec2(-direction.y,direction.x);
+vec2 inertia=pullVelocity/3.742;
+float phase=distFromGrab*15.+layer*1.7+sin(theta*3.+time*.7)*.5;
+vec2 travelling=pull*cos(phase)+inertia*sin(phase);
+float ring=(1.-influence)*halo;
+float pinchCurl=dot(travelling,direction);
+mv.xy+=pull*influence+loosen*ring*(travelling*.55+tangent*pinchCurl*.9);
+mv.z+=loosen*ring*(dot(travelling,vec2(.8,.6))*1.1+pinchCurl*sin(phase*1.7)*.65);
 for(int i=0;i<4;i++){
  float age=drops[i].z,dist=length(mv.xy-drops[i].xy);
  float front=dist-age*.82;
@@ -77,7 +87,7 @@ for(let l=0;l<3;l++){
  let k=0;
  for(let r=0;r<rows;r++){const phi=Math.acos(1.-2.*(r+.5)/rows);for(let c=0;c<cols;c++){const theta=(c+.35*Math.sin(k*12.9898))/cols*Math.PI*2;positions[k*3]=Math.sin(phi)*Math.cos(theta);positions[k*3+1]=Math.cos(phi);positions[k*3+2]=Math.sin(phi)*Math.sin(theta);seeds[k]=k;k++;}}
  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));geometry.setAttribute('seed',new THREE.BufferAttribute(seeds,1));
- const uniforms={drops:{value:drops},time:{value:0},layer:{value:l},focus:{value:l===0?1:0},grab:{value:new THREE.Vector2()},pull:{value:new THREE.Vector2()},pixelRatio:{value:renderer.getPixelRatio()},tint:{value:new THREE.Color(['#829deb','#adbaff','#6d8cd5'][l])}};layerUniforms.push(uniforms);
+ const uniforms={drops:{value:drops},time:{value:0},layer:{value:l},focus:{value:l===0?1:0},grab:{value:new THREE.Vector2()},pull:{value:new THREE.Vector2()},pullVelocity:{value:new THREE.Vector2()},loosen:{value:0},pixelRatio:{value:renderer.getPixelRatio()},tint:{value:new THREE.Color(['#829deb','#adbaff','#6d8cd5'][l])}};layerUniforms.push(uniforms);
  const material=new THREE.ShaderMaterial({uniforms,vertexShader:membraneVertex,fragmentShader:membraneFragment,transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending});
  const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,128,96),material);
  const dustMaterial=new THREE.ShaderMaterial({uniforms,vertexShader:membraneVertex,fragmentShader:fragment.replace('a*brightness','a*brightness*.12'),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
@@ -128,7 +138,12 @@ function frame(now){if(!root.isConnected)return;requestAnimationFrame(frame);con
  drops.forEach(d=>d.z=Math.min(10,d.z+dt));
  const ease=1-Math.exp(-dt*8.5);const yawNow=Math.atan2(camera.position.x,camera.position.z);let yawDelta=targetYaw-yawNow;if(yawDelta>Math.PI)yawDelta-=Math.PI*2;if(yawDelta< -Math.PI)yawDelta+=Math.PI*2;const yaw=yawNow+yawDelta*ease;const pitchNow=Math.asin(THREE.MathUtils.clamp(camera.position.y/camera.position.length(),-1,1));const pitch=pitchNow+(targetPitch-pitchNow)*ease;const distance=camera.position.length()+(targetDistance-camera.position.length())*ease;camera.position.set(Math.sin(yaw)*Math.cos(pitch)*distance,Math.sin(pitch)*distance,Math.cos(yaw)*Math.cos(pitch)*distance);camera.lookAt(0,0,0);
  layerUniforms.forEach((u,i)=>u.focus.value+=(Number(i===activeLayer)-u.focus.value)*ease);
- if(drag.layer){springStep(drag.value,drag.velocity,drag.target,drag.id!==null,dt);layers.forEach((m,i)=>m.material.uniforms.pull.value.copy(drag.value).multiplyScalar(m===drag.layer?1:.18+i*.06));}
+ if(drag.layer){springStep(drag.value,drag.velocity,drag.target,drag.id!==null,dt);layers.forEach((m,i)=>{
+   const u=m.material.uniforms,strength=m===drag.layer?1:.07;
+   u.pull.value.copy(drag.value).multiplyScalar(strength);
+   u.pullVelocity.value.copy(drag.velocity).multiplyScalar(strength).clampLength(0,8);
+   u.loosen.value+=((drag.id===null?1:0)-u.loosen.value)*(1-Math.exp(-dt*6));
+  });}
  layers.forEach((mesh,i)=>{
   mesh.material.uniforms.time.value=time*motionFactor;
   mesh.rotation.set(i*.64+Math.sin(time*[.09,.17,.12][i]+i)*.025,i*.92+Math.sin(time*[.12,.08,.15][i]+i)*.035,i*.38+Math.sin(time*[.07,.13,.1][i]+i)*.02);
@@ -177,7 +192,7 @@ function frame(now){if(!root.isConnected)return;requestAnimationFrame(frame);con
  const value={x:touch.x,y:touch.y},velocity={x:touch.vx,y:touch.vy};springStep(value,velocity,{x:touch.tx,y:touch.ty},touch.id!==null,dt);Object.assign(touch,{x:value.x,y:value.y,vx:velocity.x,vy:velocity.y});splashes.forEach(d=>d.age+=dt);hitPoints=[];
  for(const [baseP,q,l] of points){const speeds=[1.25,-2.3,1.75],verticalSpeeds=[.38,-.78,1.08],flow=t*motionFactor*speeds[l],verticalSpeed=verticalSpeeds[l];const p=baseP+Math.sin(t*verticalSpeed+q*2+l)*[.035,.115,.06][l]*Math.sin(baseP);const drift=(Math.sin(flow*.47+l*2.3)*.18+Math.sin(baseP*2.5+t*verticalSpeed+l*1.7)*.055)*Math.sin(baseP);const a=q+t*(.045+l*.01)+drift,fold=Math.pow(.5+.5*Math.sin(baseP*6+q*2+flow*.36+l*1.9),3.5),rad=1+Math.sin(q*3+baseP*4+flow*.43+l*2.1)*.035+Math.sin(q*5-baseP*3-flow*.31+l)*.022+fold*.055-l*.014;
  let x=Math.sin(p)*Math.cos(a)*rad,y=Math.cos(p)*rad,z=Math.sin(p)*Math.sin(a)*rad;const tilt=l*.65+.3;const yy=y*Math.cos(tilt)-z*Math.sin(tilt);z=y*Math.sin(tilt)+z*Math.cos(tilt);y=yy;const angle=l*.65+Math.sin(t*[.09,.17,.12][l]+l)*.025+t*[.02,-.03,.018][l];const xx=x*Math.cos(angle)-y*Math.sin(angle);y=x*Math.sin(angle)+y*Math.cos(angle);x=xx;const perspective=3.8/(3.8-z);let sx=w/2+x*size*perspective,sy=h/2+y*size*perspective;
- if(touch.layer>=0){const weight=Math.exp(-((sx-touch.ax)**2+(sy-touch.ay)**2)/(size*size*(.5+Math.hypot(touch.x,touch.y)/size*.36))),strength=l===touch.layer?1:.18+l*.06;sx+=touch.x*weight*strength;sy+=touch.y*weight*strength;}if(!matchReduced){for(const drop of splashes){const dx=sx-drop.x,dy=sy-drop.y,dist=Math.hypot(dx,dy)/size,front=dist-drop.age*.82,envelope=Math.exp(-drop.age*.8)/Math.sqrt(1+drop.age*2)*Math.min(1,drop.age/.11),pulse=(Math.sin(front*10)*Math.exp(-front*front*2.4)+.22*Math.sin(front*17-.65)*Math.exp(-front*front*4.5))*envelope;sx+=dx/Math.max(dist,.03)*pulse*.055;sy+=dy/Math.max(dist,.03)*pulse*.055;}}hitPoints.push([sx,sy,l]);if(q===0){ctx.beginPath();ctx.moveTo(sx,sy);}else ctx.lineTo(sx,sy);if(q>6.23){ctx.strokeStyle='rgba(143,169,245,.025)';ctx.lineWidth=.55;ctx.stroke();}ctx.fillStyle='rgba(143,169,245,'+((.012+fold*.13)*(.6+.4*(z+1)/2))+')';ctx.fillRect(sx,sy,.55*perspective,.55*perspective);}}
+ if(touch.layer>=0){const weight=Math.exp(-((sx-touch.ax)**2+(sy-touch.ay)**2)/(size*size*.035)),strength=l===touch.layer?1:.07;sx+=touch.x*weight*strength;sy+=touch.y*weight*strength;}if(!matchReduced){for(const drop of splashes){const dx=sx-drop.x,dy=sy-drop.y,dist=Math.hypot(dx,dy)/size,front=dist-drop.age*.82,envelope=Math.exp(-drop.age*.8)/Math.sqrt(1+drop.age*2)*Math.min(1,drop.age/.11),pulse=(Math.sin(front*10)*Math.exp(-front*front*2.4)+.22*Math.sin(front*17-.65)*Math.exp(-front*front*4.5))*envelope;sx+=dx/Math.max(dist,.03)*pulse*.055;sy+=dy/Math.max(dist,.03)*pulse*.055;}}hitPoints.push([sx,sy,l]);if(q===0){ctx.beginPath();ctx.moveTo(sx,sy);}else ctx.lineTo(sx,sy);if(q>6.23){ctx.strokeStyle='rgba(143,169,245,.025)';ctx.lineWidth=.55;ctx.stroke();}ctx.fillStyle='rgba(143,169,245,'+((.012+fold*.13)*(.6+.4*(z+1)/2))+')';ctx.fillRect(sx,sy,.55*perspective,.55*perspective);}}
  requestAnimationFrame(frame);
 }
 }
