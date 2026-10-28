@@ -4,6 +4,21 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 const runtime = readFileSync(new URL('../public/silk-runtime.js', import.meta.url), 'utf8');
+const spring = runInNewContext(`(${runtime.slice(runtime.indexOf('function springStep'), runtime.indexOf('\ntry {'))})`);
+for (const fps of [30, 60, 120]) {
+  test(`released layer overshoots and settles over six seconds at ${fps} FPS`, () => {
+    const value = { x: 1, y: -.5 }, velocity = { x: 0, y: 0 };
+    let opposite = 0, lateMotion = 0;
+    for (let frame = 0; frame < fps * 6; frame++) {
+      spring(value, velocity, { x: 0, y: 0 }, false, 1 / fps);
+      opposite = Math.min(opposite, value.x);
+      if (frame > fps * 3 && frame < fps * 4) lateMotion = Math.max(lateMotion, Math.abs(value.x));
+    }
+    assert.ok(opposite < -.45, 'must swing visibly past its original position');
+    assert.ok(lateMotion > .025, 'must not snap to rest early');
+    assert.ok(Math.hypot(value.x, value.y, velocity.x / Math.sqrt(14), velocity.y / Math.sqrt(14)) < .015, 'must settle by six seconds');
+  });
+}
 const handlers = runtime.slice(runtime.indexOf('// Vertical touch gestures'), runtime.indexOf("const button=root.querySelector('#pause');"));
 function setup() {
   const listeners = {};

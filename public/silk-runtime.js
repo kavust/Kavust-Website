@@ -10,9 +10,9 @@ const descriptions={
 function showLayer(i){activeLayer=i;root.dataset.layer=String(i);if(cameraTarget){targetDistance=i===1?.58:5.5;targetYaw=i===2?Math.PI:0;targetPitch=i===2?.2:.06;}root.querySelectorAll('[data-layer]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.layer===i)));const fallback=english?['Aromas depend on grape variety and winemaking.','Body, acidity and tannin shape the texture.','The flavours and sensations that remain after a sip.']:['Aromalar üzüm çeşidi ve üretim yöntemiyle şekillenir.','Gövde, asidite ve tanen dokuyu belirler.','Bir yudumdan sonra kalan tatlar ve duyumlar.'];root.querySelector('#layer-description').textContent=descriptions[region]?.[english?1:0][i]||fallback[i];}
 root.querySelectorAll('[data-layer]').forEach(b=>b.onclick=()=>showLayer(+b.dataset.layer));showLayer(0);
 root.addEventListener('wine-sensory',event=>{const e={data:event.detail};english=!!e.data.en;region=String(e.data.name||'');motionFactor=({'Bordeaux':.8,'Champagne':1.4,'Napa Valley':1.05,'Ege':1.2})[region]||1;root.querySelector('#region-name').textContent=region+' · '+(english?'Wine layers':'Şarabın katmanları');root.querySelector('#sensory-grapes').textContent=Array.isArray(e.data.grapes)?e.data.grapes.join(' · '):'';root.querySelectorAll('[data-layer]').forEach((b,i)=>b.textContent=(english?['Aroma','Texture','Finish']:['Aroma','Doku','Bitiş'])[i]);root.querySelector('#sensory-disclaimer').textContent=english?'Illustrative style · Varies by producer and vintage.':'Temsili stil · Üretici ve rekolteye göre değişir.';showLayer(activeLayer);});
-// Small integration steps keep the elastic return stable on slower phones.
+// Low release damping gives three weightless swings and a roughly six-second decay.
 function springStep(value,velocity,target,held,dt){
- const steps=Math.ceil(dt/.008),h=dt/steps,k=held?145:24,damping=held?22:7.5;
+ const steps=Math.ceil(dt/.008),h=dt/steps,k=held?145:14,damping=held?22:1.65;
  for(let i=0;i<steps;i++){velocity.x+=((target.x-value.x)*k-velocity.x*damping)*h;velocity.y+=((target.y-value.y)*k-velocity.y*damping)*h;value.x+=velocity.x*h;value.y+=velocity.y*h;}
 }
 try {

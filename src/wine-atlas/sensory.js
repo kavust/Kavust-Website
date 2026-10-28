@@ -1,4 +1,4 @@
-const revision = 'native-scroll-hd-20261028';
+const revision = 'weightless-silk-20261028';
 
 export function mountSensory(root, en) {
   const host = document.createElement('div');
