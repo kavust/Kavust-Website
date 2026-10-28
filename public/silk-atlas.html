@@ -77,10 +77,12 @@ mv.xy+=pull*influence;
 mv.z+=sin(length(offset)*4.)*length(pull)*influence*.12;
 for(int i=0;i<4;i++){
  float age=drops[i].z,dist=length(mv.xy-drops[i].xy);
- float front=dist-age*1.8;
- float pulse=sin(front*16.)*exp(-front*front*10.)*exp(-age*1.8)*smoothstep(0.,.07,age)*drops[i].w;
- mv.xy+=(mv.xy-drops[i].xy)/max(dist,.03)*pulse*.16;
- mv.z+=pulse*.2;
+ float front=dist-age*.82;
+ float envelope=exp(-age*.8)/sqrt(1.+age*2.)*smoothstep(0.,.11,age);
+ float packet=sin(front*10.)*exp(-front*front*2.4)+.22*sin(front*17.-.65)*exp(-front*front*4.5);
+ float pulse=packet*envelope*drops[i].w;
+ mv.xy+=(mv.xy-drops[i].xy)/max(dist,.03)*pulse*.055;
+ mv.z+=pulse*.08;
 }
 gl_Position=projectionMatrix*mv;
 gl_PointSize=(.9+fold*.35)*(1.+focus*.42)*pixelRatio*(4.8/-mv.z);
@@ -156,7 +158,7 @@ function frame(now){requestAnimationFrame(frame);if(now-last<22)return;const dt=
  const value={x:touch.x,y:touch.y},velocity={x:touch.vx,y:touch.vy};springStep(value,velocity,{x:touch.tx,y:touch.ty},touch.id!==null,dt);Object.assign(touch,{x:value.x,y:value.y,vx:velocity.x,vy:velocity.y});splashes.forEach(d=>d.age+=dt);hitPoints=[];
  for(const [baseP,q,l] of points){const speeds=[1.25,-2.3,1.75],verticalSpeeds=[.38,-.78,1.08],flow=t*motionFactor*speeds[l],verticalSpeed=verticalSpeeds[l];const p=baseP+Math.sin(t*verticalSpeed+q*2+l)*[.035,.115,.06][l]*Math.sin(baseP);const drift=(Math.sin(flow*.47+l*2.3)*.18+Math.sin(baseP*2.5+t*verticalSpeed+l*1.7)*.055)*Math.sin(baseP);const a=q+t*(.045+l*.01)+drift,fold=Math.pow(.5+.5*Math.sin(baseP*6+q*2+flow*.36+l*1.9),3.5),rad=1+Math.sin(q*3+baseP*4+flow*.43+l*2.1)*.035+Math.sin(q*5-baseP*3-flow*.31+l)*.022+fold*.055-l*.014;
  let x=Math.sin(p)*Math.cos(a)*rad,y=Math.cos(p)*rad,z=Math.sin(p)*Math.sin(a)*rad;const tilt=l*.65+.3;const yy=y*Math.cos(tilt)-z*Math.sin(tilt);z=y*Math.sin(tilt)+z*Math.cos(tilt);y=yy;const angle=l*.65+Math.sin(t*[.09,.17,.12][l]+l)*.025+t*[.02,-.03,.018][l];const xx=x*Math.cos(angle)-y*Math.sin(angle);y=x*Math.sin(angle)+y*Math.cos(angle);x=xx;const perspective=3.8/(3.8-z);let sx=w/2+x*size*perspective,sy=h/2+y*size*perspective;
- if(touch.layer>=0){const weight=Math.exp(-((sx-touch.ax)**2+(sy-touch.ay)**2)/(size*size*(.5+Math.hypot(touch.x,touch.y)/size*.36))),strength=l===touch.layer?1:.18+l*.06;sx+=touch.x*weight*strength;sy+=touch.y*weight*strength;}if(!matchReduced){for(const drop of splashes){const dx=sx-drop.x,dy=sy-drop.y,dist=Math.hypot(dx,dy)/size,front=dist-drop.age*1.8,pulse=Math.sin(front*16)*Math.exp(-front*front*10-drop.age*1.8)*Math.min(1,drop.age/.07)*.16;sx+=dx/Math.max(dist,.03)*pulse;sy+=dy/Math.max(dist,.03)*pulse;}}hitPoints.push([sx,sy,l]);if(q===0){ctx.beginPath();ctx.moveTo(sx,sy);}else ctx.lineTo(sx,sy);if(q>6.23){ctx.strokeStyle='rgba(143,169,245,.025)';ctx.lineWidth=.55;ctx.stroke();}ctx.fillStyle='rgba(143,169,245,'+((.012+fold*.13)*(.6+.4*(z+1)/2))+')';ctx.fillRect(sx,sy,.55*perspective,.55*perspective);}}
+ if(touch.layer>=0){const weight=Math.exp(-((sx-touch.ax)**2+(sy-touch.ay)**2)/(size*size*(.5+Math.hypot(touch.x,touch.y)/size*.36))),strength=l===touch.layer?1:.18+l*.06;sx+=touch.x*weight*strength;sy+=touch.y*weight*strength;}if(!matchReduced){for(const drop of splashes){const dx=sx-drop.x,dy=sy-drop.y,dist=Math.hypot(dx,dy)/size,front=dist-drop.age*.82,envelope=Math.exp(-drop.age*.8)/Math.sqrt(1+drop.age*2)*Math.min(1,drop.age/.11),pulse=(Math.sin(front*10)*Math.exp(-front*front*2.4)+.22*Math.sin(front*17-.65)*Math.exp(-front*front*4.5))*envelope;sx+=dx/Math.max(dist,.03)*pulse*.055;sy+=dy/Math.max(dist,.03)*pulse*.055;}}hitPoints.push([sx,sy,l]);if(q===0){ctx.beginPath();ctx.moveTo(sx,sy);}else ctx.lineTo(sx,sy);if(q>6.23){ctx.strokeStyle='rgba(143,169,245,.025)';ctx.lineWidth=.55;ctx.stroke();}ctx.fillStyle='rgba(143,169,245,'+((.012+fold*.13)*(.6+.4*(z+1)/2))+')';ctx.fillRect(sx,sy,.55*perspective,.55*perspective);}}
  requestAnimationFrame(frame);
 }
 </script>
