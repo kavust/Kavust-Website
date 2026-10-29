@@ -9,7 +9,7 @@ const descriptions={
  'Ege':[['Bornova Misketi için çiçek ve narenciye çağrışımları.','Stile göre hafiften dolguna değişen doku.','Üzüm ve üretim stiline göre değişen bitiş.'],['Floral and citrus notes in Bornova Misketi.','Texture ranges from light to full depending on style.','Finish varies with grape and winemaking style.']]
 };
 function showLayer(i){
- activeLayer=i;root.dataset.layer=String(i);dnaTarget=i===1?1:0;finishTarget=i===2?1:0;
+ activeLayer=i;root.dataset.layer=String(i);dnaTarget=i===1?1:0;finishTarget=i===0?1:0;
  if(cameraTarget){targetDistance=i===1?3.35:5.5;targetYaw=0;targetPitch=.06;}
  root.querySelectorAll('[data-layer]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.layer===i)));
  const fallback=english?['Aromas depend on grape variety and winemaking.','Body, acidity and tannin shape the texture.','The flavours and sensations that remain after a sip.']:['Aromalar üzüm çeşidi ve üretim yöntemiyle şekillenir.','Gövde, asidite ve tanen dokuyu belirler.','Bir yudumdan sonra kalan tatlar ve duyumlar.'];

@@ -12,7 +12,7 @@ test('pinch stays local instead of translating the whole membrane', () => {
   assert.match(runtime, /mv.z\+=loosen\*ring/);
 });
 test('finish transitions into an independently flowing translucent sphere while DNA remains separate', () => {
-  assert.match(runtime, /finishTarget=i===2\?1:0/);
+  assert.match(runtime, /finishTarget=i===0\?1:0/);
   assert.match(runtime, /vec3 referenceMembrane\(vec3 n,float clock,float sheet\)/);
   assert.match(runtime, /float rate=sheet<\.5\?\.34:\(sheet<1\.5\?\-\.27:\.2\)/);
   assert.match(runtime, /turn=clock\*\.09/);

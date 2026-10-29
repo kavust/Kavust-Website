@@ -1,4 +1,4 @@
-const revision = 'wine-silk-touch-orbit-zoom-20261029';
+const revision = 'wine-silk-model-order-20261029';
 
 export function mountSensory(root, en) {
   const host = document.createElement('div');
