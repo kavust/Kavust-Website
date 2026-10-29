@@ -187,37 +187,42 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;paused=redu
 const drag={id:null,layer:null,mode:'',pointerType:'',start:new THREE.Vector2(),target:new THREE.Vector2(),value:new THREE.Vector2(),velocity:new THREE.Vector2(),clientX:0,clientY:0,lastY:0};
 
 function pointer(e){const b=canvas.getBoundingClientRect();const ndc=new THREE.Vector2((e.clientX-b.left)/b.width*2-1,1-(e.clientY-b.top)/b.height*2),distance=camera.position.length();return {ndc,world:new THREE.Vector2(ndc.x*camera.aspect*distance*Math.tan(Math.PI/10),ndc.y*distance*Math.tan(Math.PI/10))};}
-function beginPull(e){const p=pointer(e);drag.mode='pull';drag.layer=layers[activeLayer];drag.start.copy(p.world);layers.forEach(m=>m.material.uniforms.grab.value.copy(p.world));splash(p.world);}
-// Vertical touch gestures remain native page scrolling, including momentum.
+function beginPull(e){const p=pointer(e);drag.mode='pull';drag.layer=layers[activeLayer===2?0:activeLayer];drag.start.copy(p.world);layers.forEach(m=>m.material.uniforms.grab.value.copy(p.world));splash(p.world);}
+const contacts=new Map();let pinchDistance=0;
+const contactDistance=()=>{const p=[...contacts.values()];return Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);};
+function zoom(factor){targetDistance=THREE.MathUtils.clamp(targetDistance*factor,.22,9);}
+canvas.style.touchAction='none';
 canvas.addEventListener('pointerdown',e=>{
- if(drag.id!==null || pointer(e).world.length()>1.2)return;
+ if(e.button!==0&&e.pointerType==='mouse')return;
+ contacts.set(e.pointerId,{x:e.clientX,y:e.clientY});canvas.setPointerCapture(e.pointerId);
+ if(contacts.size>1){drag.mode='zoom';drag.target.set(0,0);pinchDistance=contactDistance();return;}
  drag.id=e.pointerId;drag.pointerType=e.pointerType;
  drag.clientX=e.clientX;drag.clientY=e.clientY;
- drag.mode=e.pointerType==='touch'?'pending':'pull';
- if(drag.mode==='pull'){beginPull(e);canvas.setPointerCapture(e.pointerId);}
+ drag.mode=pointer(e).world.length()<1.05?'pull':'orbit';
+ if(drag.mode==='pull')beginPull(e);
 });
 canvas.addEventListener('pointermove',e=>{
+ if(!contacts.has(e.pointerId))return;
+ contacts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(contacts.size>1){const distance=contactDistance();if(distance>1&&pinchDistance>1)zoom(pinchDistance/distance);pinchDistance=distance;return;}
  if(e.pointerId!==drag.id)return;
- if(drag.mode==='pending'){
-  const dx=e.clientX-drag.clientX,dy=e.clientY-drag.clientY;
-  if(Math.hypot(dx,dy)<8)return;
-  if(Math.abs(dy)>=Math.abs(dx)){release(e);return;}
-  beginPull({clientX:drag.clientX,clientY:drag.clientY});
-  canvas.setPointerCapture(e.pointerId);
- }
+ if(drag.mode==='orbit'){targetYaw-=(e.clientX-drag.clientX)*.009;targetYaw=Math.atan2(Math.sin(targetYaw),Math.cos(targetYaw));targetPitch=THREE.MathUtils.clamp(targetPitch+(e.clientY-drag.clientY)*.009,-1.5,1.5);drag.clientX=e.clientX;drag.clientY=e.clientY;return;}
+ if(drag.mode!=='pull')return;
  drag.target.copy(pointer(e).world).sub(drag.start);
  const length=drag.target.length();
  if(length>0)drag.target.multiplyScalar(2.6*Math.tanh(length/2.6)/length);
 });
 function release(e){
- if(e.pointerId!==drag.id)return;
- if(e.type==='pointerup'&&drag.mode==='pending')splash(pointer(e).world);
+ contacts.delete(e.pointerId);
+ if(contacts.size){const [id,p]=contacts.entries().next().value;drag.id=id;drag.clientX=p.x;drag.clientY=p.y;drag.mode='orbit';drag.target.set(0,0);return;}
  drag.id=null;drag.mode='';drag.target.set(0,0);
  if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);
 }
 canvas.addEventListener('pointerup',release);
 canvas.addEventListener('pointercancel',release);
 canvas.addEventListener('lostpointercapture',release);
+canvas.addEventListener('wheel',e=>{e.preventDefault();zoom(Math.exp(THREE.MathUtils.clamp(e.deltaY,-100,100)*.006));},{passive:false});
+canvas.addEventListener('dblclick',()=>{targetDistance=activeLayer===1?3.35:5.5;targetYaw=0;targetPitch=.06;});
 const button=root.querySelector('#pause');const updateButton=()=>{button.textContent=paused?'▷':'Ⅱ';button.setAttribute('aria-label',paused?'Animasyonu oynat':'Animasyonu duraklat');};updateButton();button.onclick=()=>{paused=!paused;updateButton();};
 function frame(now){if(!root.isConnected)return;requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.04);last=now;if(!visible||document.hidden)return;if(!paused)time+=dt;
  // A damped spring only deforms the grabbed layer; the scene's centre stays fixed.
