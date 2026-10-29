@@ -1,4 +1,4 @@
-const revision = 'dna-silk-20261029';
+const revision = 'dna-ladder-20261029';
 
 export function mountSensory(root, en) {
   const host = document.createElement('div');

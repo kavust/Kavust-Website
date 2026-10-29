@@ -41,8 +41,17 @@ vec3 silk=vec3(sin(silkPhi)*cos(silkTheta),cos(silkPhi),sin(silkPhi)*sin(silkThe
 vec3 p=silk*(1.+wave+fold*.055-layer*.014);p.x+=sin(phi*3.+flow*.19+layer)*.02;
 float strand=step(1.5707963,phi),along=(theta+3.14159265)/6.2831853;
 float helixAngle=along*18.849556+strand*3.14159265+time*.72;
-float tube=.045+phi*.012;
-vec3 helix=vec3(cos(helixAngle)*(.36+tube*cos(phi*2.)),(along-.5)*1.9,sin(helixAngle)*(.36+tube*cos(phi*2.))+tube*sin(phi*2.));
+float crossSection=phi*4.;
+float tube=.035;
+vec3 helix=vec3(cos(helixAngle)*(.42+tube*cos(crossSection)),(along-.5)*1.9,sin(helixAngle)*(.42+tube*cos(crossSection))+tube*sin(crossSection));
+float rungPoint=1.-step(1.,mod(seed,24.));
+float rungIndex=floor(seed/24.);
+float rungSlot=floor(rungIndex/330.);
+float rungAlong=(rungSlot+.5)/6.;
+float rungMix=fract(rungIndex/330.)*2.-1.;
+float rungAngle=rungAlong*18.849556+time*.72;
+vec3 rung=vec3(cos(rungAngle)*.42*rungMix,(rungAlong-.5)*1.9,sin(rungAngle)*.42*rungMix);
+helix=mix(helix,rung,rungPoint);
 p=mix(p,helix,dna);
 vec4 mv=modelViewMatrix*vec4(p,1.);
 vec2 offset=mv.xy-grab;
@@ -69,8 +78,9 @@ for(int i=0;i<4;i++){
  mv.z+=pulse*.08;
 }
 gl_Position=projectionMatrix*mv;
-gl_PointSize=clamp((.9+fold*.35)*(1.+focus*.42)*pixelRatio*(4.8/max(.02,-mv.z)),.5,3.5*pixelRatio);
-brightness=(.055+fold*.34)*(.48+.52*abs(n.z))*(1.+focus*.5);}`;
+ float cleanFold=mix(fold,.5,dna);
+ gl_PointSize=clamp((.9+cleanFold*.35)*(1.+focus*.42)*pixelRatio*(4.8/max(.02,-mv.z)),.5,3.5*pixelRatio);
+brightness=(.055+mix(fold,.18,dna)*.34)*(.48+.52*abs(n.z))*(1.+focus*.5);}`;
 const fragment=`uniform vec3 tint;varying float brightness;void main(){float d=length(gl_PointCoord-.5);float a=smoothstep(.5,.12,d);gl_FragColor=vec4(tint,a*brightness);}`;
 const layers=[];
 const drops=Array.from({length:4},()=>new THREE.Vector4(0,0,10,0));let nextDrop=0;
@@ -152,7 +162,8 @@ function frame(now){if(!root.isConnected)return;requestAnimationFrame(frame);con
   });}
  layers.forEach((mesh,i)=>{
   mesh.material.uniforms.time.value=time*motionFactor;
-  mesh.rotation.set(i*.64+Math.sin(time*[.09,.17,.12][i]+i)*.025,i*.92+Math.sin(time*[.12,.08,.15][i]+i)*.035+dnaTurn,i*.38+Math.sin(time*[.07,.13,.1][i]+i)*.02);
+  const dnaAlign=layerUniforms[i].dna.value;
+  mesh.rotation.set((i*.64+Math.sin(time*[.09,.17,.12][i]+i)*.025)*(1-dnaAlign),(i*.92+Math.sin(time*[.12,.08,.15][i]+i)*.035)*(1-dnaAlign)+dnaTurn,(i*.38+Math.sin(time*[.07,.13,.1][i]+i)*.02)*(1-dnaAlign));
  });renderer.render(scene,camera);
 }requestAnimationFrame(frame);
 }catch(error){
