@@ -7,7 +7,7 @@ const descriptions={
  'Napa Valley':[['Olgun siyah meyve çağrışımları.','Cabernet için dolgun, yapılı stil.','Yoğun meyveli bitiş.'],['Ripe dark-fruit notes.','A full, structured Cabernet style.','A concentrated fruit-led finish.']],
  'Ege':[['Bornova Misketi için çiçek ve narenciye çağrışımları.','Stile göre hafiften dolguna değişen doku.','Üzüm ve üretim stiline göre değişen bitiş.'],['Floral and citrus notes in Bornova Misketi.','Texture ranges from light to full depending on style.','Finish varies with grape and winemaking style.']]
 };
-function showLayer(i){activeLayer=i;root.dataset.layer=String(i);dnaTarget=i===1?1:0;finishTarget=i===2?1:0;if(cameraTarget){targetDistance=i===1?3.35:5.5;targetYaw=i===2?Math.PI:0;targetPitch=i===2?.2:.06;}root.querySelectorAll('[data-layer]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.layer===i)));const fallback=english?['Aromas depend on grape variety and winemaking.','Body, acidity and tannin shape the texture.','The flavours and sensations that remain after a sip.']:['Aromalar üzüm çeşidi ve üretim yöntemiyle şekillenir.','Gövde, asidite ve tanen dokuyu belirler.','Bir yudumdan sonra kalan tatlar ve duyumlar.'];root.querySelector('#layer-description').textContent=descriptions[region]?.[english?1:0][i]||fallback[i];}
+function showLayer(i){activeLayer=i;root.dataset.layer=String(i);dnaTarget=i===1?1:0;finishTarget=i===2?1:0;if(cameraTarget){targetDistance=i===1?3.35:5.5;targetYaw=0;targetPitch=.06;}root.querySelectorAll('[data-layer]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.layer===i)));const fallback=english?['Aromas depend on grape variety and winemaking.','Body, acidity and tannin shape the texture.','The flavours and sensations that remain after a sip.']:['Aromalar üzüm çeşidi ve üretim yöntemiyle şekillenir.','Gövde, asidite ve tanen dokuyu belirler.','Bir yudumdan sonra kalan tatlar ve duyumlar.'];root.querySelector('#layer-description').textContent=descriptions[region]?.[english?1:0][i]||fallback[i];}
 root.querySelectorAll('[data-layer]').forEach(b=>b.onclick=()=>showLayer(+b.dataset.layer));showLayer(0);
 root.addEventListener('wine-sensory',event=>{const e={data:event.detail};english=!!e.data.en;region=String(e.data.name||'');motionFactor=({'Bordeaux':.8,'Champagne':1.4,'Napa Valley':1.05,'Ege':1.2})[region]||1;root.querySelector('#region-name').textContent=region+' · '+(english?'Wine layers':'Şarabın katmanları');root.querySelector('#sensory-grapes').textContent=Array.isArray(e.data.grapes)?e.data.grapes.join(' · '):'';root.querySelectorAll('[data-layer]').forEach((b,i)=>b.textContent=(english?['Aroma','Texture','Finish']:['Aroma','Doku','Bitiş'])[i]);root.querySelector('#sensory-disclaimer').textContent=english?'Illustrative style · Varies by producer and vintage.':'Temsili stil · Üretici ve rekolteye göre değişir.';showLayer(activeLayer);});
 // Low release damping gives three weightless swings and a roughly six-second decay.
@@ -52,11 +52,17 @@ float rungMix=fract(rungIndex/330.)*2.-1.;
 float rungAngle=rungAlong*18.849556+time*.72;
 vec3 rung=vec3(cos(rungAngle)*.42*rungMix,(rungAlong-.5)*1.9,sin(rungAngle)*.42*rungMix);
 helix=mix(helix,rung,rungPoint);
-float spiralAngle=along*25.132742+time*(.18+layer*.075)+layer*1.35;
-float spiralCross=phi*2.;
-float spiralRadius=.12+.48*along+layer*.045+.025*cos(spiralCross);
-vec3 spiral=vec3(cos(spiralAngle)*spiralRadius,(along-.5)*1.9+.025*sin(spiralCross),sin(spiralAngle)*spiralRadius);
-p=mix(mix(p,helix,dna),spiral,finish);
+float finishSpeed=layer<.5?.34:(layer<1.5?-.29:.22);
+float finishTime=time*finishSpeed+layer*2.094;
+float finishTheta=theta+sin(phi*3.1+finishTime+layer)*.085+sin(theta*2.-phi+finishTime*.73)*.032;
+float finishPhi=phi+sin(theta*2.2-finishTime*.82+layer*1.6)*.085*sin(phi)+sin(phi*4.+theta-finishTime*.4)*.022;
+float finishFold=sin(finishTheta*4.+finishPhi*2.+finishTime+layer*1.7);
+float finishFineFold=sin(finishTheta*7.-finishPhi*3.+finishTime*.71-layer*2.3);
+float finishRadius=.94+finishFold*.027+finishFineFold*.012+sin(finishTime*.31+theta*2.+phi*1.4)*.012;
+vec3 finishSilk=vec3(sin(finishPhi)*cos(finishTheta),cos(finishPhi),sin(finishPhi)*sin(finishTheta))*finishRadius;
+float globeTurn=time*.09;
+finishSilk.xz=mat2(cos(globeTurn),-sin(globeTurn),sin(globeTurn),cos(globeTurn))*finishSilk.xz;
+p=mix(mix(p,helix,dna),finishSilk,finish);
 vec4 mv=modelViewMatrix*vec4(p,1.);
 vec2 offset=mv.xy-grab;
 // A narrow pinch stays local; phase-shifted waves fold the surrounding fabric.
@@ -85,7 +91,8 @@ gl_Position=projectionMatrix*mv;
  float composed=max(dna,finish);
  float cleanFold=mix(fold,.5,composed);
  gl_PointSize=clamp((.9+cleanFold*.35)*(1.+focus*.42)*pixelRatio*(4.8/max(.02,-mv.z)),.5,3.5*pixelRatio);
-brightness=(.055+mix(fold,.18,composed)*.34)*(.48+.52*abs(n.z))*(1.+focus*.5);}`;
+brightness=(.055+mix(fold,.18,composed)*.34)*(.48+.52*abs(n.z))*(1.+focus*.5);
+brightness=mix(brightness,brightness*.62,finish);}`;
 const fragment=`uniform vec3 tint;varying float brightness;void main(){float d=length(gl_PointCoord-.5);float a=smoothstep(.5,.12,d);gl_FragColor=vec4(tint,a*brightness);}`;
 const layers=[];
 const drops=Array.from({length:4},()=>new THREE.Vector4(0,0,10,0));let nextDrop=0;
@@ -94,12 +101,14 @@ const membraneVertex=vertex
  .replace('varying float brightness;', 'varying float brightness;varying vec3 viewPosition;')
  .replace('vec3 p=silk*(1.+wave+fold*.055-layer*.014);', 'float curl=sin(theta*2.+phi*3.+flow*.43+layer*1.7+sin(phi*2.-flow*.31)*.7);vec3 p=silk*(.89+wave*.65+curl*.095+sin(theta*4.-phi*2.-flow*.27+layer)*.025+fold*.045-layer*.009);')
  .replace('gl_Position=projectionMatrix*mv;', 'viewPosition=mv.xyz;gl_Position=projectionMatrix*mv;');
-const membraneFragment=`uniform vec3 tint;uniform float focus;varying vec3 viewPosition;varying float brightness;
+const membraneFragment=`uniform vec3 tint;uniform float focus;uniform float finish;varying vec3 viewPosition;varying float brightness;
 void main(){
  vec3 normal=normalize(cross(dFdx(viewPosition),dFdy(viewPosition)));
  float rim=pow(1.-abs(dot(normal,normalize(-viewPosition))),2.8);
  float alpha=.003+rim*(.13+focus*.055);
- gl_FragColor=vec4(tint,alpha);
+ alpha=mix(alpha,.002+rim*.15,finish);
+ vec3 color=mix(tint,vec3(.56,.62,1.),finish);
+ gl_FragColor=vec4(color,alpha);
 }`;
 const layerUniforms=[];
 for(let l=0;l<3;l++){

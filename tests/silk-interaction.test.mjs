@@ -11,10 +11,13 @@ test('pinch stays local instead of translating the whole membrane', () => {
   assert.match(runtime, /pull\*cos\(phase\)\+inertia\*sin\(phase\)/);
   assert.match(runtime, /mv.z\+=loosen\*ring/);
 });
-test('finish transitions into its own flowing spiral while DNA remains separate', () => {
+test('finish transitions into an independently flowing translucent sphere while DNA remains separate', () => {
   assert.match(runtime, /finishTarget=i===2\?1:0/);
-  assert.match(runtime, /float spiralAngle=along\*25\.132742\+time/);
-  assert.match(runtime, /p=mix\(mix\(p,helix,dna\),spiral,finish\)/);
+  assert.match(runtime, /float finishSpeed=layer<\.5\?\.34:\(layer<1\.5\?\-\.29:\.22\)/);
+  assert.match(runtime, /vec3 finishSilk=vec3\(sin\(finishPhi\)\*cos\(finishTheta\),cos\(finishPhi\),sin\(finishPhi\)\*sin\(finishTheta\)\)\*finishRadius/);
+  assert.match(runtime, /float globeTurn=time\*\.09/);
+  assert.match(runtime, /p=mix\(mix\(p,helix,dna\),finishSilk,finish\)/);
+  assert.match(runtime, /vec3 color=mix\(tint,vec3\(\.56,\.62,1\.\),finish\)/);
   assert.match(runtime, /u\.finish\.value\+=/);
 });
 const spring = runInNewContext(`(${runtime.slice(runtime.indexOf('function springStep'), runtime.indexOf('\ntry {'))})`);
