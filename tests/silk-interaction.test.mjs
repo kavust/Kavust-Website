@@ -13,12 +13,20 @@ test('pinch stays local instead of translating the whole membrane', () => {
 });
 test('finish transitions into an independently flowing translucent sphere while DNA remains separate', () => {
   assert.match(runtime, /finishTarget=i===2\?1:0/);
-  assert.match(runtime, /float finishSpeed=layer<\.5\?\.34:\(layer<1\.5\?\-\.29:\.22\)/);
-  assert.match(runtime, /vec3 finishSilk=vec3\(sin\(finishPhi\)\*cos\(finishTheta\),cos\(finishPhi\),sin\(finishPhi\)\*sin\(finishTheta\)\)\*finishRadius/);
-  assert.match(runtime, /float globeTurn=time\*\.09/);
-  assert.match(runtime, /p=mix\(mix\(p,helix,dna\),finishSilk,finish\)/);
-  assert.match(runtime, /vec3 color=mix\(tint,vec3\(\.56,\.62,1\.\),finish\)/);
+  assert.match(runtime, /vec3 referenceMembrane\(vec3 n,float clock,float sheet\)/);
+  assert.match(runtime, /float rate=sheet<\.5\?\.34:\(sheet<1\.5\?\-\.27:\.2\)/);
+  assert.match(runtime, /turn=clock\*\.09/);
+  assert.match(runtime, /p=mix\(p,helix,dna\)/);
+  assert.match(runtime, /if\(finish>\.0001\)p=mix\(p,referenceMembrane\(n,referenceTime,layer\),finish\)/);
   assert.match(runtime, /u\.finish\.value\+=/);
+});
+test('reference clock is independent of country tempo and glow is finish-only', () => {
+  assert.match(runtime, /uniforms\.referenceTime\.value=time;/);
+  assert.match(runtime, /if\(finishAmount>\.001\)/);
+  assert.match(runtime, /else renderer\.render\(scene,camera\)/);
+  assert.match(runtime, /mesh\.geometry=layerUniforms\[i\]\.finish\.value>\.001\?referenceGeometry:mesh\.userData\.baseGeometry/);
+  const deformation=runtime.slice(runtime.indexOf('vec3 referenceMembrane'),runtime.indexOf('void main(){vec3 n='));
+  assert.doesNotMatch(deformation, /mod\(|floor\(clock|%/);
 });
 const spring = runInNewContext(`(${runtime.slice(runtime.indexOf('function springStep'), runtime.indexOf('\ntry {'))})`);
 for (const fps of [30, 60, 120]) {

@@ -30,6 +30,8 @@
 #kavust-silk-preview #pause{width:32px;height:32px;border-radius:50%;font-size:13px;flex-shrink:0}
 #kavust-silk-preview canvas{filter:brightness(1.42)}
 #kavust-silk-preview[data-layer="2"] .orb-stage{background:#0c1927}
+#kavust-silk-preview[data-layer="2"] canvas{filter:none}
+#kavust-silk-preview[data-finish-unavailable="true"] canvas{visibility:hidden}
 #kavust-silk-preview[data-layer="2"] .orb-stage::before,#kavust-silk-preview[data-layer="2"] .orb-stage::after{display:none;animation:none}
 @media(prefers-reduced-motion:reduce){#kavust-silk-preview .orb-stage::before,#kavust-silk-preview .orb-stage::after{animation:none}}
 </style>
