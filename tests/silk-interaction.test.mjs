@@ -11,6 +11,12 @@ test('pinch stays local instead of translating the whole membrane', () => {
   assert.match(runtime, /pull\*cos\(phase\)\+inertia\*sin\(phase\)/);
   assert.match(runtime, /mv.z\+=loosen\*ring/);
 });
+test('finish transitions into its own flowing spiral while DNA remains separate', () => {
+  assert.match(runtime, /finishTarget=i===2\?1:0/);
+  assert.match(runtime, /float spiralAngle=along\*25\.132742\+time/);
+  assert.match(runtime, /p=mix\(mix\(p,helix,dna\),spiral,finish\)/);
+  assert.match(runtime, /u\.finish\.value\+=/);
+});
 const spring = runInNewContext(`(${runtime.slice(runtime.indexOf('function springStep'), runtime.indexOf('\ntry {'))})`);
 for (const fps of [30, 60, 120]) {
   test(`released layer overshoots and settles over six seconds at ${fps} FPS`, () => {

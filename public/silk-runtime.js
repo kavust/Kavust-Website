@@ -1,13 +1,13 @@
 
 export async function initSilk(root) {
-let english=false,region='',activeLayer=0,motionFactor=1,cameraTarget=null,targetYaw=0,targetPitch=.06,targetDistance=5.5,dnaTarget=0,dnaTurn=0;
+let english=false,region='',activeLayer=0,motionFactor=1,cameraTarget=null,targetYaw=0,targetPitch=.06,targetDistance=5.5,dnaTarget=0,finishTarget=0,dnaTurn=0;
 const descriptions={
  'Bordeaux':[['Siyah meyve ve baharat çağrışımları.','Yapılı, tanenli kırmızı stil.','Uzun ve katmanlı bitiş.'],['Dark fruit and spice notes.','Structured, tannic red style.','Long, layered finish.']],
  'Champagne':[['Narenciye ve beyaz meyve çağrışımları.','Canlı asidite ve ince kabarcıklar.','Ferah, temiz bitiş.'],['Citrus and white-fruit notes.','Lively acidity and fine bubbles.','Fresh, clean finish.']],
  'Napa Valley':[['Olgun siyah meyve çağrışımları.','Cabernet için dolgun, yapılı stil.','Yoğun meyveli bitiş.'],['Ripe dark-fruit notes.','A full, structured Cabernet style.','A concentrated fruit-led finish.']],
  'Ege':[['Bornova Misketi için çiçek ve narenciye çağrışımları.','Stile göre hafiften dolguna değişen doku.','Üzüm ve üretim stiline göre değişen bitiş.'],['Floral and citrus notes in Bornova Misketi.','Texture ranges from light to full depending on style.','Finish varies with grape and winemaking style.']]
 };
-function showLayer(i){activeLayer=i;root.dataset.layer=String(i);dnaTarget=i===1?1:0;if(cameraTarget){targetDistance=i===1?3.35:5.5;targetYaw=i===2?Math.PI:0;targetPitch=i===2?.2:.06;}root.querySelectorAll('[data-layer]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.layer===i)));const fallback=english?['Aromas depend on grape variety and winemaking.','Body, acidity and tannin shape the texture.','The flavours and sensations that remain after a sip.']:['Aromalar üzüm çeşidi ve üretim yöntemiyle şekillenir.','Gövde, asidite ve tanen dokuyu belirler.','Bir yudumdan sonra kalan tatlar ve duyumlar.'];root.querySelector('#layer-description').textContent=descriptions[region]?.[english?1:0][i]||fallback[i];}
+function showLayer(i){activeLayer=i;root.dataset.layer=String(i);dnaTarget=i===1?1:0;finishTarget=i===2?1:0;if(cameraTarget){targetDistance=i===1?3.35:5.5;targetYaw=i===2?Math.PI:0;targetPitch=i===2?.2:.06;}root.querySelectorAll('[data-layer]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.layer===i)));const fallback=english?['Aromas depend on grape variety and winemaking.','Body, acidity and tannin shape the texture.','The flavours and sensations that remain after a sip.']:['Aromalar üzüm çeşidi ve üretim yöntemiyle şekillenir.','Gövde, asidite ve tanen dokuyu belirler.','Bir yudumdan sonra kalan tatlar ve duyumlar.'];root.querySelector('#layer-description').textContent=descriptions[region]?.[english?1:0][i]||fallback[i];}
 root.querySelectorAll('[data-layer]').forEach(b=>b.onclick=()=>showLayer(+b.dataset.layer));showLayer(0);
 root.addEventListener('wine-sensory',event=>{const e={data:event.detail};english=!!e.data.en;region=String(e.data.name||'');motionFactor=({'Bordeaux':.8,'Champagne':1.4,'Napa Valley':1.05,'Ege':1.2})[region]||1;root.querySelector('#region-name').textContent=region+' · '+(english?'Wine layers':'Şarabın katmanları');root.querySelector('#sensory-grapes').textContent=Array.isArray(e.data.grapes)?e.data.grapes.join(' · '):'';root.querySelectorAll('[data-layer]').forEach((b,i)=>b.textContent=(english?['Aroma','Texture','Finish']:['Aroma','Doku','Bitiş'])[i]);root.querySelector('#sensory-disclaimer').textContent=english?'Illustrative style · Varies by producer and vintage.':'Temsili stil · Üretici ve rekolteye göre değişir.';showLayer(activeLayer);});
 // Low release damping gives three weightless swings and a roughly six-second decay.
@@ -24,7 +24,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(36,1,.02,30);camera.position.z=5.5;cameraTarget=new THREE.Vector3(0,0,5.5);
 showLayer(activeLayer);
 const group=new THREE.Group();scene.add(group);
-const vertex=`uniform float time;uniform float layer;uniform float pixelRatio;uniform float focus;uniform float dna;uniform vec2 grab;uniform vec2 pull;uniform vec2 pullVelocity;uniform float loosen;uniform vec4 drops[4];attribute float seed;varying float brightness;
+const vertex=`uniform float time;uniform float layer;uniform float pixelRatio;uniform float focus;uniform float dna;uniform float finish;uniform vec2 grab;uniform vec2 pull;uniform vec2 pullVelocity;uniform float loosen;uniform vec4 drops[4];attribute float seed;varying float brightness;
 void main(){vec3 n=normalize(position);float theta=atan(n.z,n.x);float phi=acos(clamp(n.y,-1.,1.));
 float speed=layer<.5?1.25:(layer<1.5?-2.3:1.75);
 float verticalSpeed=layer<.5?.38:(layer<1.5?-.78:1.08);
@@ -52,7 +52,11 @@ float rungMix=fract(rungIndex/330.)*2.-1.;
 float rungAngle=rungAlong*18.849556+time*.72;
 vec3 rung=vec3(cos(rungAngle)*.42*rungMix,(rungAlong-.5)*1.9,sin(rungAngle)*.42*rungMix);
 helix=mix(helix,rung,rungPoint);
-p=mix(p,helix,dna);
+float spiralAngle=along*25.132742+time*(.18+layer*.075)+layer*1.35;
+float spiralCross=phi*2.;
+float spiralRadius=.12+.48*along+layer*.045+.025*cos(spiralCross);
+vec3 spiral=vec3(cos(spiralAngle)*spiralRadius,(along-.5)*1.9+.025*sin(spiralCross),sin(spiralAngle)*spiralRadius);
+p=mix(mix(p,helix,dna),spiral,finish);
 vec4 mv=modelViewMatrix*vec4(p,1.);
 vec2 offset=mv.xy-grab;
 // A narrow pinch stays local; phase-shifted waves fold the surrounding fabric.
@@ -78,9 +82,10 @@ for(int i=0;i<4;i++){
  mv.z+=pulse*.08;
 }
 gl_Position=projectionMatrix*mv;
- float cleanFold=mix(fold,.5,dna);
+ float composed=max(dna,finish);
+ float cleanFold=mix(fold,.5,composed);
  gl_PointSize=clamp((.9+cleanFold*.35)*(1.+focus*.42)*pixelRatio*(4.8/max(.02,-mv.z)),.5,3.5*pixelRatio);
-brightness=(.055+mix(fold,.18,dna)*.34)*(.48+.52*abs(n.z))*(1.+focus*.5);}`;
+brightness=(.055+mix(fold,.18,composed)*.34)*(.48+.52*abs(n.z))*(1.+focus*.5);}`;
 const fragment=`uniform vec3 tint;varying float brightness;void main(){float d=length(gl_PointCoord-.5);float a=smoothstep(.5,.12,d);gl_FragColor=vec4(tint,a*brightness);}`;
 const layers=[];
 const drops=Array.from({length:4},()=>new THREE.Vector4(0,0,10,0));let nextDrop=0;
@@ -102,7 +107,7 @@ for(let l=0;l<3;l++){
  let k=0;
  for(let r=0;r<rows;r++){const phi=Math.acos(1.-2.*(r+.5)/rows);for(let c=0;c<cols;c++){const theta=(c+.35*Math.sin(k*12.9898))/cols*Math.PI*2;positions[k*3]=Math.sin(phi)*Math.cos(theta);positions[k*3+1]=Math.cos(phi);positions[k*3+2]=Math.sin(phi)*Math.sin(theta);seeds[k]=k;k++;}}
  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));geometry.setAttribute('seed',new THREE.BufferAttribute(seeds,1));
- const uniforms={drops:{value:drops},time:{value:0},layer:{value:l},focus:{value:l===0?1:0},dna:{value:0},grab:{value:new THREE.Vector2()},pull:{value:new THREE.Vector2()},pullVelocity:{value:new THREE.Vector2()},loosen:{value:0},pixelRatio:{value:renderer.getPixelRatio()},tint:{value:new THREE.Color(['#829deb','#adbaff','#6d8cd5'][l])}};layerUniforms.push(uniforms);
+ const uniforms={drops:{value:drops},time:{value:0},layer:{value:l},focus:{value:l===0?1:0},dna:{value:0},finish:{value:0},grab:{value:new THREE.Vector2()},pull:{value:new THREE.Vector2()},pullVelocity:{value:new THREE.Vector2()},loosen:{value:0},pixelRatio:{value:renderer.getPixelRatio()},tint:{value:new THREE.Color(['#829deb','#adbaff','#6d8cd5'][l])}};layerUniforms.push(uniforms);
  const material=new THREE.ShaderMaterial({uniforms,vertexShader:membraneVertex,fragmentShader:membraneFragment,transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending});
  const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,128,96),material);
  const dustMaterial=new THREE.ShaderMaterial({uniforms,vertexShader:membraneVertex,fragmentShader:fragment.replace('a*brightness','a*brightness*.12'),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
@@ -152,7 +157,7 @@ function frame(now){if(!root.isConnected)return;requestAnimationFrame(frame);con
  // A damped spring only deforms the grabbed layer; the scene's centre stays fixed.
  drops.forEach(d=>d.z=Math.min(10,d.z+dt));
  const ease=1-Math.exp(-dt*8.5);const yawNow=Math.atan2(camera.position.x,camera.position.z);let yawDelta=targetYaw-yawNow;if(yawDelta>Math.PI)yawDelta-=Math.PI*2;if(yawDelta< -Math.PI)yawDelta+=Math.PI*2;const yaw=yawNow+yawDelta*ease;const pitchNow=Math.asin(THREE.MathUtils.clamp(camera.position.y/camera.position.length(),-1,1));const pitch=pitchNow+(targetPitch-pitchNow)*ease;const distance=camera.position.length()+(targetDistance-camera.position.length())*ease;camera.position.set(Math.sin(yaw)*Math.cos(pitch)*distance,Math.sin(pitch)*distance,Math.cos(yaw)*Math.cos(pitch)*distance);camera.lookAt(0,0,0);
- const dnaEase=1-Math.exp(-dt*2.4);layerUniforms.forEach(u=>u.dna.value+=(dnaTarget-u.dna.value)*dnaEase);if(dnaTarget>.001)dnaTurn+=dt*.42;
+ const dnaEase=1-Math.exp(-dt*2.4);layerUniforms.forEach(u=>{u.dna.value+=(dnaTarget-u.dna.value)*dnaEase;u.finish.value+=(finishTarget-u.finish.value)*dnaEase;});if(dnaTarget>.001)dnaTurn+=dt*.42;
  layerUniforms.forEach((u,i)=>u.focus.value+=(Number(i===activeLayer)-u.focus.value)*ease);
  if(drag.layer){springStep(drag.value,drag.velocity,drag.target,drag.id!==null,dt);layers.forEach((m,i)=>{
    const u=m.material.uniforms,strength=m===drag.layer?1:.07;
@@ -162,8 +167,8 @@ function frame(now){if(!root.isConnected)return;requestAnimationFrame(frame);con
   });}
  layers.forEach((mesh,i)=>{
   mesh.material.uniforms.time.value=time*motionFactor;
-  const dnaAlign=layerUniforms[i].dna.value;
-  mesh.rotation.set((i*.64+Math.sin(time*[.09,.17,.12][i]+i)*.025)*(1-dnaAlign),(i*.92+Math.sin(time*[.12,.08,.15][i]+i)*.035)*(1-dnaAlign)+dnaTurn,(i*.38+Math.sin(time*[.07,.13,.1][i]+i)*.02)*(1-dnaAlign));
+  const dnaAlign=layerUniforms[i].dna.value,compositionAlign=Math.max(dnaAlign,layerUniforms[i].finish.value);
+  mesh.rotation.set((i*.64+Math.sin(time*[.09,.17,.12][i]+i)*.025)*(1-compositionAlign),(i*.92+Math.sin(time*[.12,.08,.15][i]+i)*.035)*(1-compositionAlign)+dnaTurn*(1-layerUniforms[i].finish.value),(i*.38+Math.sin(time*[.07,.13,.1][i]+i)*.02)*(1-compositionAlign));
  });renderer.render(scene,camera);
 }requestAnimationFrame(frame);
 }catch(error){
