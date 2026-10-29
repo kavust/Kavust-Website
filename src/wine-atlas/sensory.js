@@ -1,4 +1,4 @@
-const revision = 'local-silk-folds-20261028';
+const revision = 'dna-silk-20261029';
 
 export function mountSensory(root, en) {
   const host = document.createElement('div');
