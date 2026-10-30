@@ -2,9 +2,9 @@ const revision = 'wine-silk-model-order-20261029';
 
 export function mountSensory(root, en) {
   const host = document.createElement('div');
-  host.style.cssText = 'display:block;width:100%;margin-top:16px;';
+  host.style.cssText = 'display:block;width:100%;min-width:0;grid-column:1 / -1;margin-top:16px;';
   const shadow = host.attachShadow({ mode: 'open' });
-  root.querySelector('.country-panel').append(host);
+  root.querySelector('.country-panel').after(host);
   let state = { en, name: '', grapes: [] };
   let content;
   const send = () => content?.dispatchEvent(new CustomEvent('wine-sensory', { detail: state }));
